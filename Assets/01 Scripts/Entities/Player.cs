@@ -29,6 +29,7 @@ public class Player : SkeletalEntity {
     [SerializeField] private WeaponBase _currentWeapon;
 
     private Vector2 _inputVec;
+    private Vector3 _lookDir;
 
     private PlayerStateBase _currentStateBase;
     private PlayerStateCombat _currentStateCombat;
@@ -161,7 +162,11 @@ public class Player : SkeletalEntity {
 
             _owner._characterController.Move(_owner._velocity * Time.deltaTime);
 
-            _owner._targetRotation = Quaternion.LookRotation(_owner._moveDir);
+            if (_owner._currentStateCombat == PlayerStateCombat.Idle)
+                _owner._targetRotation = Quaternion.LookRotation(_owner._moveDir);
+            else
+                _owner._targetRotation = Quaternion.LookRotation(_owner._lookDir);
+
             _owner.transform.rotation =  Quaternion.Slerp(
                     _owner.transform.rotation, 
                     _owner._targetRotation, 
@@ -180,6 +185,12 @@ public class Player : SkeletalEntity {
 
         public override void Update() {
             if (Mouse.current.leftButton.wasPressedThisFrame) {
+                Plane plane = new Plane(Vector3.up, _owner.transform.position);
+                Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+                if (plane.Raycast(ray, out float rayDistance)) {
+                    _owner._lookDir = ray.GetPoint(rayDistance) - _owner.transform.position;
+                }
+
                 _owner.SetStateCombat(PlayerStateCombat.Attack);
                 return;
             }
