@@ -2,11 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static UnityEngine.UI.GridLayoutGroup;
 
 public class Player : SkeletalEntity {
-    public enum PlayerState {
+    public enum PlayerStateBase {
         Idle,
-        Run,
+        Run
+    }
+
+    public enum PlayerStateCombat {
+        Idle,
         Attack
     }
 
@@ -25,8 +30,12 @@ public class Player : SkeletalEntity {
 
     private Vector2 _inputVec;
 
-    private PlayerState _currentState;
-    private Dictionary<PlayerState, StateBase<Player>> _stateClasses = new();
+    private PlayerStateBase _currentStateBase;
+    private PlayerStateCombat _currentStateCombat;
+
+    private Dictionary<PlayerStateBase, StateBase<Player>> _stateClassesBase = new();
+    private Dictionary<PlayerStateCombat, StateBase<Player>> _stateClassesCombat = new();
+
 
     private float rayLength = 0.1f;
 
@@ -38,14 +47,19 @@ public class Player : SkeletalEntity {
         _weaponslotRight = transform.Find(WeaponslotRightPath);
         SetWeapone((Instantiate(Resources.Load("Prefabs/Weapons/sword_1handed")) as GameObject).GetComponent<WeaponBase>());
 
-        _currentState = PlayerState.Idle;
-        _stateClasses.Add(PlayerState.Idle, new IdleState(this));
-        _stateClasses.Add(PlayerState.Run, new RunState(this));
-        _stateClasses.Add(PlayerState.Attack, new AttackState(this));
+        _currentStateBase = PlayerStateBase.Idle;
+        _currentStateCombat = PlayerStateCombat.Idle;
+
+        _stateClassesBase.Add(PlayerStateBase.Idle, new IdleState(this));
+        _stateClassesBase.Add(PlayerStateBase.Run, new RunState(this));
+
+        _stateClassesCombat.Add(PlayerStateCombat.Idle, new IdleStateCombat(this));
+        _stateClassesCombat.Add(PlayerStateCombat.Attack, new AttackState(this));
     }
 
     void Update() {
-        _stateClasses[_currentState].Update();
+        _stateClassesBase[_currentStateBase].Update();
+        _stateClassesCombat[_currentStateCombat].Update();
     }
 
 
@@ -87,31 +101,33 @@ public class Player : SkeletalEntity {
         return flag;
     }
 
-    public void SetState(PlayerState state) {
-        if (_currentState == state) return;
+    public void SetStateBase(PlayerStateBase state) {
+        if (_currentStateBase == state) return;
 
-        _currentState = state;
-        _stateClasses[_currentState].Start();
+        _currentStateBase = state;
+        _stateClassesBase[_currentStateBase].Start();
+    }
+
+    public void SetStateCombat(PlayerStateCombat state) {
+        if (_currentStateCombat == state) return;
+
+        _currentStateCombat = state;
+        _stateClassesCombat[_currentStateCombat].Start();
     }
 
 
     //==================== State Classes
+    //=================================== Base States
     private class IdleState : StateBase<Player> {
         public IdleState(Player owner) : base(owner) { }
 
         public override void Start() {
             _owner._animator.CrossFade(AHIdle, 0.1f);
-            Debug.Log("Idle");
         }
 
         public override void Update() {
             if (_owner._moveDir.magnitude > 0.0f) {
-                _owner.SetState(PlayerState.Run);
-                return;
-            }
-
-            if (Mouse.current.leftButton.wasPressedThisFrame) {
-                _owner.SetState(PlayerState.Attack);
+                _owner.SetStateBase(PlayerStateBase.Run);
                 return;
             }
         }
@@ -122,17 +138,11 @@ public class Player : SkeletalEntity {
 
         public override void Start() {
             _owner._animator.CrossFade(AHRun, 0.1f);
-            Debug.Log("Run");
         }
 
         public override void Update() {
             if (_owner._moveDir.magnitude <= 0.0f) {
-                _owner.SetState(PlayerState.Idle);
-                return;
-            }
-
-            if (Mouse.current.leftButton.wasPressedThisFrame) {
-                _owner.SetState(PlayerState.Attack);
+                _owner.SetStateBase(PlayerStateBase.Idle);
                 return;
             }
 
@@ -159,24 +169,37 @@ public class Player : SkeletalEntity {
         }
     }
 
+
+    //=================================== Combat States
+    private class IdleStateCombat : StateBase<Player> {
+        public IdleStateCombat(Player owner) : base(owner) { }
+
+        public override void Start() {
+            _owner._animator.CrossFade(AHIdle, 0.1f, 1);
+        }
+
+        public override void Update() {
+            if (Mouse.current.leftButton.wasPressedThisFrame) {
+                _owner.SetStateCombat(PlayerStateCombat.Attack);
+                return;
+            }
+        }
+    }
+
     private class AttackState : StateBase<Player> {
         public AttackState(Player owner) : base(owner) { }
 
         public override void Start() {
-            _owner._animator.CrossFade(AH1HAttackSliceHorizontal, 0.1f);
-            Debug.Log("Attack");
+            _owner._animator.CrossFade(AH1HAttackSliceHorizontal, 0.1f, 1);
         }
 
         public override void Update() {
-            AnimatorStateInfo stateInfo = _owner._animator.GetCurrentAnimatorStateInfo(0);
+            AnimatorStateInfo stateInfo = _owner._animator.GetCurrentAnimatorStateInfo(1);
 
-            if (!_owner._animator.IsInTransition(0)) {
-                if (stateInfo.normalizedTime >= 0.5 && _owner._moveDir.magnitude > 0.0f) {
-                    _owner.SetState(PlayerState.Run);
-                }
-
-                if (stateInfo.normalizedTime >= 1.0f) {
-                    _owner.SetState(PlayerState.Idle);
+            if (!_owner._animator.IsInTransition(1)) {
+                if (stateInfo.normalizedTime >= 0.5) {
+                    _owner.SetStateCombat(PlayerStateCombat.Idle);
+                    return;
                 }
             }
         }
