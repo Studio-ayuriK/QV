@@ -6,7 +6,7 @@ public abstract class SkeletalEntity : MonoBehaviour {
 
     protected Animator _animator;
 
-    protected Vector3 _moveDir;
+    protected Vector3 _moveDirVec;
     protected Vector3 _velocity;
     protected Quaternion _targetRotation;
 }

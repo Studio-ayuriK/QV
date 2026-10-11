@@ -12,23 +12,23 @@ AvatarMask:
   - m_Path: 
     m_Weight: 1
   - m_Path: Mannequin_Medium_ArmLeft
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Mannequin_Medium_ArmRight
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Mannequin_Medium_Body
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Mannequin_Medium_Head
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Mannequin_Medium_LegLeft
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Mannequin_Medium_LegRight
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Rig_Medium
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Rig_Medium/root
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Rig_Medium/root/hips
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Rig_Medium/root/hips/spine
     m_Weight: 1
   - m_Path: Rig_Medium/root/hips/spine/chest

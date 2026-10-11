@@ -15,10 +15,20 @@ public class Player : SkeletalEntity {
         Attack
     }
 
+    public enum MoveDirection {
+        Forward,
+        Backward,
+        Right,
+        Left
+    }
+
 
     //==================== Private Field
     private static readonly int AHIdle = Animator.StringToHash("Idle");
     private static readonly int AHRun = Animator.StringToHash("Running");
+    private static readonly int AHWalkBack = Animator.StringToHash("Walking_Backward");
+    private static readonly int AHRunRight = Animator.StringToHash("Running_Right");
+    private static readonly int AHRunLeft = Animator.StringToHash("Running_Left");
     private static readonly int AH1HAttackSliceDiagonal = Animator.StringToHash("1H_Attack_Slice_Diagonal");
     private static readonly int AH1HAttackSliceHorizontal = Animator.StringToHash("1H_Attack_Slice_Horizontal");
 
@@ -33,6 +43,9 @@ public class Player : SkeletalEntity {
 
     private PlayerStateBase _currentStateBase;
     private PlayerStateCombat _currentStateCombat;
+    private MoveDirection _moveDir;
+
+    private Quaternion _upperRotationDiff;
 
     private Dictionary<PlayerStateBase, StateBase<Player>> _stateClassesBase = new();
     private Dictionary<PlayerStateCombat, StateBase<Player>> _stateClassesCombat = new();
@@ -50,6 +63,7 @@ public class Player : SkeletalEntity {
 
         _currentStateBase = PlayerStateBase.Idle;
         _currentStateCombat = PlayerStateCombat.Idle;
+        _moveDir = MoveDirection.Forward;
 
         _stateClassesBase.Add(PlayerStateBase.Idle, new IdleState(this));
         _stateClassesBase.Add(PlayerStateBase.Run, new RunState(this));
@@ -70,7 +84,7 @@ public class Player : SkeletalEntity {
         Vector3 forward = new Vector3(Camera.main.transform.forward.x, 0.0f, Camera.main.transform.forward.z).normalized;
         Vector3 right = new Vector3(Camera.main.transform.right.x, 0.0f, Camera.main.transform.right.z).normalized;
 
-        _moveDir = (right * _inputVec.x + forward * _inputVec.y).normalized;
+        _moveDirVec = (right * _inputVec.x + forward * _inputVec.y).normalized;
     }
 
     void OnInteract() {
@@ -102,18 +116,28 @@ public class Player : SkeletalEntity {
         return flag;
     }
 
-    public void SetStateBase(PlayerStateBase state) {
-        if (_currentStateBase == state) return;
+    // SetState~ Methods returns true when it changes state
+    public bool SetStateBase(PlayerStateBase state) {
+        if (_currentStateBase == state) return false;
 
         _currentStateBase = state;
         _stateClassesBase[_currentStateBase].Start();
+        return true;
     }
 
-    public void SetStateCombat(PlayerStateCombat state) {
-        if (_currentStateCombat == state) return;
+    public bool SetStateCombat(PlayerStateCombat state) {
+        if (_currentStateCombat == state) return false;
 
         _currentStateCombat = state;
         _stateClassesCombat[_currentStateCombat].Start();
+        return true;
+    }
+
+    public bool SetMoveDirection(MoveDirection direction) {
+        if (_moveDir == direction) return false;
+
+        _moveDir = direction;
+        return true;
     }
 
 
@@ -127,9 +151,18 @@ public class Player : SkeletalEntity {
         }
 
         public override void Update() {
-            if (_owner._moveDir.magnitude > 0.0f) {
+            if (_owner._moveDirVec.magnitude > 0.0f) {
                 _owner.SetStateBase(PlayerStateBase.Run);
                 return;
+            }
+
+            if (_owner._currentStateCombat != PlayerStateCombat.Idle) {
+                _owner._targetRotation = Quaternion.LookRotation(_owner._lookDir);
+
+                _owner.transform.rotation = Quaternion.Slerp(
+                        _owner.transform.rotation,
+                        _owner._targetRotation,
+                        _owner.rotationSpeed * Time.deltaTime);
             }
         }
     }
@@ -142,12 +175,12 @@ public class Player : SkeletalEntity {
         }
 
         public override void Update() {
-            if (_owner._moveDir.magnitude <= 0.0f) {
+            if (_owner._moveDirVec.magnitude <= 0.0f) {
                 _owner.SetStateBase(PlayerStateBase.Idle);
                 return;
             }
 
-            _owner._velocity = _owner._moveDir * _owner.moveSpeed;
+            _owner._velocity = _owner._moveDirVec * _owner.moveSpeed;
 
             // Ground Check
             if (_owner.IsOnGround()) {
@@ -162,15 +195,59 @@ public class Player : SkeletalEntity {
 
             _owner._characterController.Move(_owner._velocity * Time.deltaTime);
 
-            if (_owner._currentStateCombat == PlayerStateCombat.Idle)
-                _owner._targetRotation = Quaternion.LookRotation(_owner._moveDir);
-            else
+            if (_owner._currentStateCombat == PlayerStateCombat.Idle) {
+                if(_owner.SetMoveDirection(MoveDirection.Forward))
+                    _owner._animator.CrossFade(AHRun, 0.1f);
+
+                _owner._targetRotation = Quaternion.LookRotation(_owner._moveDirVec);
+            }
+            else {
+                CheckRotation();
                 _owner._targetRotation = Quaternion.LookRotation(_owner._lookDir);
+            }
 
             _owner.transform.rotation =  Quaternion.Slerp(
                     _owner.transform.rotation, 
                     _owner._targetRotation, 
                     _owner.rotationSpeed * Time.deltaTime);
+        }
+
+        private void CheckRotation() {
+            Vector3.SignedAngle(_owner._lookDir, _owner._moveDirVec, Vector3.up);
+            float theta = Vector3.SignedAngle(_owner._lookDir, _owner._moveDirVec, Vector3.up);
+
+            MoveDirection moveDir = MoveDirection.Forward;
+            if (Mathf.Abs(theta) >= 120.0f)
+                moveDir = MoveDirection.Backward;
+            else if (Mathf.Abs(theta) >= 50.0f)
+                moveDir = theta > 0.0f ? MoveDirection.Right : MoveDirection.Left;
+
+            _owner._upperRotationDiff = Quaternion.FromToRotation(_owner._moveDirVec, _owner._lookDir);
+
+            if (_owner.SetMoveDirection(moveDir)) {
+                switch (moveDir) {
+                    case MoveDirection.Forward:
+                        _owner._animator.CrossFade(AHRun, 0.1f);
+                        _owner._targetRotation = Quaternion.LookRotation(_owner._moveDirVec);
+                        Debug.Log("Forward");
+                        break;
+                    case MoveDirection.Backward:
+                        _owner._animator.CrossFade(AHWalkBack, 0.1f);
+                        //_owner._targetRotation = Quaternion.LookRotation(-_owner._moveDirVec);
+                        Debug.Log("Backward");
+                        break;
+                    case MoveDirection.Right:
+                        _owner._animator.CrossFade(AHWalkBack, 0.1f);
+                        //_owner._targetRotation = Quaternion.LookRotation(-Vector3.Cross(Vector3.up, _owner._moveDirVec));
+                        Debug.Log("Right");
+                        break;
+                    case MoveDirection.Left:
+                        _owner._animator.CrossFade(AHWalkBack, 0.1f);
+                        //_owner._targetRotation = Quaternion.LookRotation(Vector3.Cross(Vector3.up, _owner._moveDirVec));
+                        Debug.Log("Left");
+                        break;
+                }
+            }
         }
     }
 
@@ -187,6 +264,7 @@ public class Player : SkeletalEntity {
             if (Mouse.current.leftButton.wasPressedThisFrame) {
                 Plane plane = new Plane(Vector3.up, _owner.transform.position);
                 Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+
                 if (plane.Raycast(ray, out float rayDistance)) {
                     _owner._lookDir = ray.GetPoint(rayDistance) - _owner.transform.position;
                 }
@@ -208,7 +286,7 @@ public class Player : SkeletalEntity {
             AnimatorStateInfo stateInfo = _owner._animator.GetCurrentAnimatorStateInfo(1);
 
             if (!_owner._animator.IsInTransition(1)) {
-                if (stateInfo.normalizedTime >= 0.5) {
+                if (stateInfo.normalizedTime >= 0.5f) {
                     _owner.SetStateCombat(PlayerStateCombat.Idle);
                     return;
                 }

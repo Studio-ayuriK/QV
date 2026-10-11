@@ -49,7 +49,7 @@ public class LargeEnemyTest : SkeletalEntity {
                 SetState(LargeEnemyState.Tracking);
             }
 
-            _targetRotation = Quaternion.LookRotation(_moveDir);
+            _targetRotation = Quaternion.LookRotation(_moveDirVec);
             transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, rotationSpeed * Time.deltaTime);
         }
         else {
@@ -85,8 +85,8 @@ public class LargeEnemyTest : SkeletalEntity {
 
         public override void Update() {
             Transform ownerTransform = _owner.transform;
-            _owner._moveDir = (_owner._playerTransform.position - ownerTransform.position).normalized;
-            _owner._velocity = _owner._moveDir * _owner.moveSpeed;
+            _owner._moveDirVec = (_owner._playerTransform.position - ownerTransform.position).normalized;
+            _owner._velocity = _owner._moveDirVec * _owner.moveSpeed;
 
             RaycastHit hit;
             if (Physics.Raycast(ownerTransform.position, Vector3.down, out hit, 2.5f, LayerMask.GetMask("Ground"))) {
