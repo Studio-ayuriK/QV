@@ -5,6 +5,7 @@ using UnityEngine.AI;
 public class NavMeshMovement : MonoBehaviour, IEnemyMovement
 {
     private NavMeshAgent agent;
+    [Tooltip("¸ØÃß´Â °Å¸®")]
     [SerializeField] private float stoppingDistance = 1.5f;
     public bool HasReachedDestination =>
         !agent.pathPending && agent.hasPath && agent.remainingDistance <= agent.stoppingDistance;
