@@ -110,6 +110,10 @@ public class Player : SkeletalEntity {
     }
 
 
+    void AttackOneHand() {
+        Debug.Log("Attack");
+    }
+
     //==================== Custom Method
     public void SetWeapone(WeaponBase weaponBase) {
         if (weaponBase == _currentWeapon) return;
