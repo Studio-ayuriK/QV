@@ -399,6 +399,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2507688288413854918, guid: fda0d871ae9a3304c8c3754aaedeff9b, type: 3}
+      propertyPath: _currentWeapon
+      value: 
+      objectReference: {fileID: 1452616998321667487, guid: fb713e4a59dd60c4280fab1c70888d00, type: 3}
+    - target: {fileID: 2507688288413854918, guid: fda0d871ae9a3304c8c3754aaedeff9b, type: 3}
+      propertyPath: _currentWeapone
+      value: 
+      objectReference: {fileID: 1452616998321667487, guid: fb713e4a59dd60c4280fab1c70888d00, type: 3}
     - target: {fileID: 3836791424807175528, guid: fda0d871ae9a3304c8c3754aaedeff9b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
