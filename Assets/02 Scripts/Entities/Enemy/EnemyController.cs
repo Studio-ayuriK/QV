@@ -25,10 +25,6 @@ public class EnemyController : MonoBehaviour
         Combat = GetComponent<EnemyCombat>();
         Movement = GetComponent<NavMeshMovement>();
 
-        Debug.Log($"Detector: {Detector}");
-        Debug.Log($"Combat: {Combat}");
-        Debug.Log($"Movement: {Movement}");
-
         StateMachine = new EnemyStateMachine();
 
         IdleState = new IdleState(this, StateMachine);
