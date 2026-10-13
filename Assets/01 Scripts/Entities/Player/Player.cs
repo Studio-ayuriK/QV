@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static UnityEngine.UI.GridLayoutGroup;
 
 public class Player : SkeletalEntity {
     public enum PlayerStateBase {
@@ -41,9 +40,12 @@ public class Player : SkeletalEntity {
     private Transform _weaponslotRight;
     private Transform _spineTransform;
     [SerializeField] private WeaponBase _currentWeapon;
+    [SerializeField] private GameObject _attackColliderObj;
 
     private Vector2 _inputVec;
     private Vector3 _lookDir;
+    [SerializeField] private Vector3 _attackPointOffset = new Vector3(0.0f, 1.0f, 1.0f);
+    [SerializeField] private Vector3 _attackRange = new Vector3(1.0f, 1.0f, 1.5f);
 
     private PlayerStateBase _currentStateBase;
     private PlayerStateCombat _currentStateCombat;
@@ -66,6 +68,7 @@ public class Player : SkeletalEntity {
         _weaponslotRight = transform.Find(WeaponslotRightPath);
         _spineTransform = transform.Find(SpineTransformPath);
         SetWeapone((Instantiate(Resources.Load("Prefabs/Weapons/sword_1handed")) as GameObject).GetComponent<WeaponBase>());
+        _attackColliderObj = Resources.Load("Prefabs/AttackCollider") as GameObject;
 
         _currentStateBase = PlayerStateBase.Idle;
         _currentStateCombat = PlayerStateCombat.Idle;
@@ -109,9 +112,18 @@ public class Player : SkeletalEntity {
         }
     }
 
-
+    // 디버그 렌더링 필요하면 구현, 아직 리팩토링 필요한 기능임
     void AttackOneHand() {
         Debug.Log("Attack");
+        Collider[] enemies = Physics.OverlapBox(
+            transform.position + (_lookDir + transform.rotation * _attackPointOffset),
+            _attackRange / 2.0f, 
+            Quaternion.identity,
+            LayerMask.GetMask("Enemies"));
+
+        foreach (Collider c in enemies) {
+            Debug.Log(c.name);
+        }
     }
 
     //==================== Custom Method
@@ -275,7 +287,7 @@ public class Player : SkeletalEntity {
                 Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
 
                 if (plane.Raycast(ray, out float rayDistance)) {
-                    _owner._lookDir = ray.GetPoint(rayDistance) - _owner.transform.position;
+                    _owner._lookDir = (ray.GetPoint(rayDistance) - _owner.transform.position).normalized;
                 }
 
                 _owner.SetStateCombat(PlayerStateCombat.Attack);
