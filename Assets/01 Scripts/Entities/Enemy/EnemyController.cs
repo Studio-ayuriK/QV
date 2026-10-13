@@ -3,18 +3,18 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour
 {
     #region Enemy AI
-    public EnemyDetector Detector { get; private set; }     // ÇÃ·¹ÀÌ¾î Å½Áö±â
-    public IEnemyMovement Movement { get; private set; }    //  Enemy ¿òÁ÷ÀÓ »óÅÂ
-    public EnemyCombat Combat { get; private set; }         //  Enemy ÀüÅõ»óÅÂ
+    public EnemyDetector Detector { get; private set; }     // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Å½ï¿½ï¿½ï¿½ï¿½
+    public IEnemyMovement Movement { get; private set; }    //  Enemy ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public EnemyCombat Combat { get; private set; }         //  Enemy ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     #endregion
 
     public EnemyStateMachine StateMachine { get; private set; }
 
     #region Enemy State
-    public IdleState IdleState { get; private set; }        // ´ë±â »óÅÂ
-    public ChaseState ChaseState { get; private set; }      // Ãß°İ »óÅÂ
-    public AttackState AttackState { get; private set; }    // °ø°İ »óÅÂ
-    public DeadState DeadState { get; private set; }        // Á×Àº »óÅÂ
+    public IdleState IdleState { get; private set; }        // ï¿½ï¿½ï¿½ ï¿½aã…ã„´ã…‡ã„¹
+    public ChaseState ChaseState { get; private set; }      // ï¿½ß°ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public AttackState AttackState { get; private set; }    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public DeadState DeadState { get; private set; }        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 
     #endregion
