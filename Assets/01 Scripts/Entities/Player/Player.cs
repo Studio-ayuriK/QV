@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static PublicDefines;
 
 public class Player : SkeletalEntity {
     public enum PlayerStateBase {
@@ -23,17 +24,6 @@ public class Player : SkeletalEntity {
 
 
     //==================== Private Field
-    private static readonly int AHIdle = Animator.StringToHash("Idle");
-    private static readonly int AHRun = Animator.StringToHash("Running");
-    private static readonly int AHWalkBack = Animator.StringToHash("Walking_Backward");
-    private static readonly int AHRunRight = Animator.StringToHash("Running_Right");
-    private static readonly int AHRunLeft = Animator.StringToHash("Running_Left");
-    private static readonly int AH1HAttackSliceDiagonal = Animator.StringToHash("1H_Attack_Slice_Diagonal");
-    private static readonly int AH1HAttackSliceHorizontal = Animator.StringToHash("1H_Attack_Slice_Horizontal");
-
-    private static readonly string WeaponslotRightPath = "Rig_Medium/root/hips/spine/chest/upperarm.r/lowerarm.r/wrist.r/hand.r/weaponslot.r";
-    private static readonly string SpineTransformPath = "Rig_Medium/root/hips/spine";
-
     private static readonly float AllowInputTime1HAttackSliceHorizontal = 0.3f;
     private static readonly float AnimLen1HAttackSliceHorizontal = 0.5f;
 
@@ -65,8 +55,10 @@ public class Player : SkeletalEntity {
     void Start() {
         _characterController = GetComponent<CharacterController>();
         _animator = GetComponent<Animator>();
-        _weaponslotRight = transform.Find(WeaponslotRightPath);
-        _spineTransform = transform.Find(SpineTransformPath);
+        _weaponslotRight = transform.Find(TPWeaponslotRight);
+        _spineTransform = transform.Find(TPSpineTransform);
+
+        // TEMP: 임시로 무기 장착중, 인벤토리 시스템 구현 후 완전 교체 예정
         SetWeapone((Instantiate(Resources.Load("Prefabs/Weapons/sword_1handed")) as GameObject).GetComponent<WeaponBase>());
 
         _currentStateBase = PlayerStateBase.Idle;
@@ -141,6 +133,15 @@ public class Player : SkeletalEntity {
         bool flag = Physics.Raycast(new Ray(transform.position, Vector3.down), rayLength, LayerMask.GetMask("Ground"));
         Debug.DrawRay(transform.position, Vector3.down, Color.red, rayLength);
         return flag;
+    }
+
+    private void PickingGroundPoint() {
+        Plane plane = new Plane(Vector3.up, transform.position);
+        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+
+        if (plane.Raycast(ray, out float rayDistance)) {
+            _lookDir = (ray.GetPoint(rayDistance) - transform.position).normalized;
+        }
     }
 
     // SetState~ Methods returns true when it changes state
@@ -282,12 +283,7 @@ public class Player : SkeletalEntity {
 
         public override void Update() {
             if (Mouse.current.leftButton.wasPressedThisFrame) {
-                Plane plane = new Plane(Vector3.up, _owner.transform.position);
-                Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-
-                if (plane.Raycast(ray, out float rayDistance)) {
-                    _owner._lookDir = (ray.GetPoint(rayDistance) - _owner.transform.position).normalized;
-                }
+                _owner.PickingGroundPoint();
 
                 _owner.SetStateCombat(PlayerStateCombat.Attack);
                 return;
@@ -307,12 +303,7 @@ public class Player : SkeletalEntity {
 
             if (Mouse.current.leftButton.wasPressedThisFrame) {
                 if (stateInfo.normalizedTime >= AllowInputTime1HAttackSliceHorizontal) {
-                    Plane plane = new Plane(Vector3.up, _owner.transform.position);
-                    Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-
-                    if (plane.Raycast(ray, out float rayDistance)) {
-                        _owner._lookDir = (ray.GetPoint(rayDistance) - _owner.transform.position).normalized;
-                    }
+                    _owner.PickingGroundPoint();
 
                     _owner.SetStateCombat(PlayerStateCombat.Attack, true);
                     return;
