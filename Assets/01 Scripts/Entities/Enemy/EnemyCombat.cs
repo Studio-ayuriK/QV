@@ -3,9 +3,9 @@ using UnityEngine;
 public class EnemyCombat : MonoBehaviour
 {
     [Header("Combat Settings")]
-    [SerializeField] private float attackRange = 2f;
-    [SerializeField] private float attackDamage = 10f;
-    [SerializeField] private float attackCooldown = 1.5f;
+    [SerializeField] private float attackRange;
+    [SerializeField] private float attackDamage;
+    [SerializeField] private float attackCooldown;
 
     private EnemyDetector detector;
     private bool isAttacking;
@@ -13,9 +13,17 @@ public class EnemyCombat : MonoBehaviour
 
     public float AttackRange => attackRange;
 
-    private void Awake()
+    private void Start()
     {
         detector = GetComponent<EnemyDetector>();
+        EnemyController enemy = GetComponent<EnemyController>();
+
+        if (enemy != null && enemy.Data != null)
+        {
+            attackDamage = enemy.Data.AttackDamage;
+            attackRange = enemy.Data.AttackRange;
+            attackCooldown = enemy.Data.AttackCooldown;
+        }
     }
 
     private void Update()
@@ -58,11 +66,11 @@ public class EnemyCombat : MonoBehaviour
             target.position
         );
 
-        // °ø°İ ½ÇÇà Á÷Àü¿¡ »ç°Å¸® ÀçÈ®ÀÎ
+        // ê³µê²© ì‹¤í–‰ ì§ì „ì— ì‚¬ê±°ë¦¬ ì¬í™•ì¸
         if (distance > attackRange)
             return;
 
-        // ´ë»ó ¶Ç´Â »óÀ§ ¿ÀºêÁ§Æ®¿¡¼­ ÇÇÇØ Ã³¸® ÄÄÆ÷³ÍÆ® °Ë»ö
+        // ëŒ€ìƒ ë˜ëŠ” ìƒìœ„ ì˜¤ë¸Œì íŠ¸ì—ì„œ í”¼í•´ ì²˜ë¦¬ ì»´í¬ë„ŒíŠ¸ ê²€ìƒ‰
         MonoBehaviour[] components =
             target.GetComponentsInParent<MonoBehaviour>();
 

@@ -5,7 +5,7 @@ using UnityEngine.AI;
 public class NavMeshMovement : MonoBehaviour, IEnemyMovement
 {
     private NavMeshAgent agent;
-    [Tooltip("¸ØÃß´Â °Å¸®")]
+    [Tooltip("ë©ˆì¶”ëŠ” ê±°ë¦¬")]
     [SerializeField] private float stoppingDistance = 1.5f;
     public bool HasReachedDestination =>
         !agent.pathPending && agent.hasPath && agent.remainingDistance <= agent.stoppingDistance;
@@ -14,6 +14,14 @@ public class NavMeshMovement : MonoBehaviour, IEnemyMovement
     {
         agent = GetComponent<NavMeshAgent>();
         agent.stoppingDistance = stoppingDistance;
+    }
+    private void Start()
+    {
+        EnemyController enemy =  GetComponent<EnemyController>();
+        if (enemy != null && enemy.Data != null)
+        {
+            agent.speed = enemy.Data.MoveSpeed;
+        }
     }
 
     public void SetDestination(Vector3 destination)

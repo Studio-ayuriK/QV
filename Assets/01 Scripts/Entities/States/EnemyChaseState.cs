@@ -1,10 +1,10 @@
 using UnityEngine;
 
-public class ChaseState : EnemyState
+public class EnemyChaseState : EnemyState
 {
-    private float repathTimer;      // °æ·Î Ã£´Â ½Ã°£
-    private const float RepathInterval = 0.2f;  //  Àç°æ·Î Å½»ö ½Ã°£
-    public ChaseState(EnemyController enemyController, EnemyStateMachine enemyStateMachine) : base(enemyController, enemyStateMachine)
+    private float repathTimer;      // ê²½ë¡œ ì°¾ëŠ” ì‹œê°„
+    private const float RepathInterval = 0.2f;  //  ì¬ê²½ë¡œ íƒìƒ‰ ì‹œê°„
+    public EnemyChaseState(EnemyController enemyController, EnemyStateMachine enemyStateMachine) : base(enemyController, enemyStateMachine)
     {
     }
 

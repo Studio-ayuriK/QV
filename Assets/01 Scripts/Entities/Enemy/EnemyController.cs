@@ -10,11 +10,15 @@ public class EnemyController : MonoBehaviour
 
     public EnemyStateMachine StateMachine { get; private set; }
 
+    [Header("Enmey Data")]
+    [SerializeField] private EnemyDataSO enemyData;
+    public EnemyDataSO Data => enemyData;
+
     #region Enemy State
-    public IdleState IdleState { get; private set; }        // ��� �aㅁㄴㅇㄹ
-    public ChaseState ChaseState { get; private set; }      // �߰� ����
-    public AttackState AttackState { get; private set; }    // ���� ����
-    public DeadState DeadState { get; private set; }        // ���� ����
+    public EnemyIdleState IdleState { get; private set; }        // 대기
+    public EnemyChaseState ChaseState { get; private set; }      // 추격
+    public EnemyAttackState AttackState { get; private set; }    // 공격
+    public EnemyDeadState DeadState { get; private set; }        // 죽음
 
 
     #endregion
@@ -27,10 +31,10 @@ public class EnemyController : MonoBehaviour
 
         StateMachine = new EnemyStateMachine();
 
-        IdleState = new IdleState(this, StateMachine);
-        ChaseState = new ChaseState(this, StateMachine);
-        AttackState = new AttackState(this, StateMachine);
-        DeadState = new DeadState(this, StateMachine);
+        IdleState = new EnemyIdleState(this, StateMachine);
+        ChaseState = new EnemyChaseState(this, StateMachine);
+        AttackState = new EnemyAttackState(this, StateMachine);
+        DeadState = new EnemyDeadState(this, StateMachine);
     }
 
     private void Start()

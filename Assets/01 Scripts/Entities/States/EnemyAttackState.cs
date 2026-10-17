@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class AttackState : EnemyState
+public class EnemyAttackState : EnemyState
 {
-    public AttackState(EnemyController enemyController, EnemyStateMachine enemyStateMachine) : base(enemyController, enemyStateMachine)
+    public EnemyAttackState(EnemyController enemyController, EnemyStateMachine enemyStateMachine) : base(enemyController, enemyStateMachine)
     {
     }
 

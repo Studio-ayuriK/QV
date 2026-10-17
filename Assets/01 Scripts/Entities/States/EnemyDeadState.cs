@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class DeadState : EnemyState
+public class EnemyDeadState : EnemyState
 {
-    public DeadState(
+    public EnemyDeadState(
         EnemyController enemyController,
         EnemyStateMachine enemyStateMachine)
         : base(enemyController, enemyStateMachine)
@@ -13,12 +13,12 @@ public class DeadState : EnemyState
     {
         EnemyController.Movement.Stop();
 
-        // ÃßÈÄ »ç¸Á ¾Ö´Ï¸ŞÀÌ¼Ç,
-        // Ãæµ¹ ºñÈ°¼ºÈ­ µîÀÇ Ã³¸®¸¦ Ãß°¡.
+        // ì¶”í›„ ì‚¬ë§ ì• ë‹ˆë©”ì´ì…˜,
+        // ì¶©ëŒ ë¹„í™œì„±í™” ë“±ì˜ ì²˜ë¦¬ë¥¼ ì¶”ê°€.
     }
 
     public override void Update()
     {
-        // »ç¸Á »óÅÂ¿¡¼­´Â ÀÏ¹İ AI Çàµ¿À» ¼öÇàÇÏÁö ¾ÊÀ½.
+        // ì‚¬ë§ ìƒíƒœì—ì„œëŠ” ì¼ë°˜ AI í–‰ë™ì„ ìˆ˜í–‰í•˜ì§€ ì•ŠìŒ.
     }
 }

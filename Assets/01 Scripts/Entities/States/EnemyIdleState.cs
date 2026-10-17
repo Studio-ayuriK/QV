@@ -1,9 +1,9 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class IdleState : EnemyState
+public class EnemyIdleState : EnemyState
 {
-    public IdleState(EnemyController enemyController, EnemyStateMachine enemyStateMachine)
+    public EnemyIdleState(EnemyController enemyController, EnemyStateMachine enemyStateMachine)
         : base(enemyController, enemyStateMachine) { }
 
     public override void Enter()
