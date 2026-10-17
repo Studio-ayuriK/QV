@@ -34,13 +34,13 @@ public class Player : SkeletalEntity {
     private static readonly string WeaponslotRightPath = "Rig_Medium/root/hips/spine/chest/upperarm.r/lowerarm.r/wrist.r/hand.r/weaponslot.r";
     private static readonly string SpineTransformPath = "Rig_Medium/root/hips/spine";
 
-    private static readonly float NomrmalizedTime1HAttackSliceHorizontal = 0.5f;
+    private static readonly float AllowInputTime1HAttackSliceHorizontal = 0.3f;
+    private static readonly float AnimLen1HAttackSliceHorizontal = 0.5f;
 
     private CharacterController _characterController;
     private Transform _weaponslotRight;
     private Transform _spineTransform;
     [SerializeField] private WeaponBase _currentWeapon;
-    [SerializeField] private GameObject _attackColliderObj;
 
     private Vector2 _inputVec;
     private Vector3 _lookDir;
@@ -68,7 +68,6 @@ public class Player : SkeletalEntity {
         _weaponslotRight = transform.Find(WeaponslotRightPath);
         _spineTransform = transform.Find(SpineTransformPath);
         SetWeapone((Instantiate(Resources.Load("Prefabs/Weapons/sword_1handed")) as GameObject).GetComponent<WeaponBase>());
-        _attackColliderObj = Resources.Load("Prefabs/AttackCollider") as GameObject;
 
         _currentStateBase = PlayerStateBase.Idle;
         _currentStateCombat = PlayerStateCombat.Idle;
@@ -153,8 +152,8 @@ public class Player : SkeletalEntity {
         return true;
     }
 
-    public bool SetStateCombat(PlayerStateCombat state) {
-        if (_currentStateCombat == state) return false;
+    public bool SetStateCombat(PlayerStateCombat state, bool forced = false) {
+        if (_currentStateCombat == state && !forced) return false;
 
         _currentStateCombat = state;
         _stateClassesCombat[_currentStateCombat].Start();
@@ -300,14 +299,28 @@ public class Player : SkeletalEntity {
         public AttackState(Player owner) : base(owner) { }
 
         public override void Start() {
-            _owner._animator.CrossFade(AH1HAttackSliceHorizontal, 0.1f, 1);
+            _owner._animator.CrossFade(AH1HAttackSliceHorizontal, 0.1f, 1, 0.0f);
         }
 
         public override void Update() {
             AnimatorStateInfo stateInfo = _owner._animator.GetCurrentAnimatorStateInfo(1);
 
+            if (Mouse.current.leftButton.wasPressedThisFrame) {
+                if (stateInfo.normalizedTime >= AllowInputTime1HAttackSliceHorizontal) {
+                    Plane plane = new Plane(Vector3.up, _owner.transform.position);
+                    Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+
+                    if (plane.Raycast(ray, out float rayDistance)) {
+                        _owner._lookDir = (ray.GetPoint(rayDistance) - _owner.transform.position).normalized;
+                    }
+
+                    _owner.SetStateCombat(PlayerStateCombat.Attack, true);
+                    return;
+                }
+            }
+
             if (!_owner._animator.IsInTransition(1)) {
-                if (stateInfo.normalizedTime >= NomrmalizedTime1HAttackSliceHorizontal) {
+                if (stateInfo.normalizedTime >= AnimLen1HAttackSliceHorizontal) {
                     _owner.SetStateCombat(PlayerStateCombat.Idle);
                     return;
                 }
