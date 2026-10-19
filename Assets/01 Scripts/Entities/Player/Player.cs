@@ -35,7 +35,7 @@ public class Player : SkeletalEntity {
     private Vector2 _inputVec;
     private Vector3 _lookDir;
     [SerializeField] private Vector3 _attackPointOffset = new Vector3(0.0f, 1.0f, 1.0f);
-    [SerializeField] private Vector3 _attackRange = new Vector3(1.0f, 1.0f, 1.5f);
+    [SerializeField] private Vector3 _attackRange = new Vector3(2.0f, 1.0f, 1.5f);
 
     private PlayerStateBase _currentStateBase;
     private PlayerStateCombat _currentStateCombat;
@@ -106,15 +106,18 @@ public class Player : SkeletalEntity {
     // 디버그 렌더링 필요하면 구현, 아직 리팩토링 필요한 기능임
     void AttackOneHand() {
         Debug.Log("Attack");
+        Vector3 attackPoint = transform.position + (_lookDir + transform.rotation * _attackPointOffset);
         Collider[] enemies = Physics.OverlapBox(
-            transform.position + (_lookDir + transform.rotation * _attackPointOffset),
-            _attackRange / 2.0f, 
-            Quaternion.identity,
+            attackPoint,
+            _attackRange / 2.0f,
+            transform.rotation,
             LayerMask.GetMask("Enemies"));
 
         foreach (Collider c in enemies) {
             Debug.Log(c.name);
         }
+
+        Utils.DebugDrawCube(attackPoint, transform.rotation, _attackRange / 2.0f);
     }
 
     //==================== Custom Method
@@ -168,6 +171,42 @@ public class Player : SkeletalEntity {
         return true;
     }
 
+    private void CheckCombatRotation() {
+        if (_currentStateBase != PlayerStateBase.Idle) {
+            float theta = Vector3.Angle(_lookDir, _moveDirVec);
+
+            MoveDirection moveDir = MoveDirection.Forward;
+            if (theta > _rotationThreshhold)
+                moveDir = MoveDirection.Backward;
+
+            if (SetMoveDirection(moveDir)) {
+                switch (moveDir) {
+                    case MoveDirection.Forward:
+                        _animator.CrossFade(AHRun, 0.1f);
+                        break;
+                    case MoveDirection.Backward:
+                        _animator.CrossFade(AHWalkBack, 0.1f);
+                        break;
+                }
+            }
+
+            switch (moveDir) {
+                case MoveDirection.Forward:
+                    _upperRotationDiff = Quaternion.FromToRotation(_moveDirVec, _lookDir);
+                    _targetRotation = Quaternion.LookRotation(_moveDirVec);
+                    break;
+                case MoveDirection.Backward:
+                    _upperRotationDiff = Quaternion.FromToRotation(-_moveDirVec, _lookDir);
+                    _targetRotation = Quaternion.LookRotation(-_moveDirVec);
+                    break;
+            }
+        }
+        else {
+            _targetRotation = Quaternion.LookRotation(_lookDir);
+            _upperRotationDiff = Quaternion.FromToRotation(_moveDirVec, _lookDir);
+        }
+    }
+
 
     //==================== State Classes
     //=================================== Base States
@@ -185,7 +224,7 @@ public class Player : SkeletalEntity {
             }
 
             if (_owner._currentStateCombat != PlayerStateCombat.Idle) {
-                _owner._targetRotation = Quaternion.LookRotation(_owner._lookDir);
+                _owner.CheckCombatRotation();
 
                 _owner.transform.rotation = Quaternion.Slerp(
                         _owner.transform.rotation,
@@ -232,43 +271,13 @@ public class Player : SkeletalEntity {
                 _owner._targetRotation = Quaternion.LookRotation(_owner._moveDirVec);
             }
             else {
-                CheckRotation();
+                _owner.CheckCombatRotation();
             }
 
             _owner.transform.rotation =  Quaternion.Slerp(
                     _owner.transform.rotation, 
                     _owner._targetRotation, 
                     _owner.rotationSpeed * Time.deltaTime);
-        }
-
-        private void CheckRotation() {
-            float theta = Vector3.Angle(_owner._lookDir, _owner._moveDirVec);
-
-            MoveDirection moveDir = MoveDirection.Forward;
-            if (theta > _owner._rotationThreshhold)
-                moveDir = MoveDirection.Backward;
-
-            if (_owner.SetMoveDirection(moveDir)) {
-                switch (moveDir) {
-                    case MoveDirection.Forward:
-                        _owner._animator.CrossFade(AHRun, 0.1f);
-                        break;
-                    case MoveDirection.Backward:
-                        _owner._animator.CrossFade(AHWalkBack, 0.1f);
-                        break;
-                }
-            }
-
-            switch (moveDir) {
-                case MoveDirection.Forward:
-                    _owner._upperRotationDiff = Quaternion.FromToRotation(_owner._moveDirVec, _owner._lookDir);
-                    _owner._targetRotation = Quaternion.LookRotation(_owner._moveDirVec);
-                    break;
-                case MoveDirection.Backward:
-                    _owner._upperRotationDiff = Quaternion.FromToRotation(-_owner._moveDirVec, _owner._lookDir);
-                    _owner._targetRotation = Quaternion.LookRotation(-_owner._moveDirVec);
-                    break;
-            }
         }
     }
 

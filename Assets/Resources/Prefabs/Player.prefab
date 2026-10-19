@@ -141,6 +141,9 @@ MonoBehaviour:
   moveSpeed: 6
   rotationSpeed: 20
   _currentWeapon: {fileID: 0}
+  _attackPointOffset: {x: 0, y: 1, z: 0.5}
+  _attackRange: {x: 3, y: 1, z: 1.5}
+  _rotationThreshhold: 80
 --- !u!114 &3871576277643290556
 MonoBehaviour:
   m_ObjectHideFlags: 0
