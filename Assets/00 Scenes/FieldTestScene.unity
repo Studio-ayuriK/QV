@@ -1307,6 +1307,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2507688288413854918, guid: fda0d871ae9a3304c8c3754aaedeff9b, type: 3}
+      propertyPath: _attackRange.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2507688288413854918, guid: fda0d871ae9a3304c8c3754aaedeff9b, type: 3}
+      propertyPath: _attackRange.z
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2507688288413854918, guid: fda0d871ae9a3304c8c3754aaedeff9b, type: 3}
+      propertyPath: _attackPointOffset.z
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 3836791424807175528, guid: fda0d871ae9a3304c8c3754aaedeff9b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
