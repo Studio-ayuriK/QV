@@ -47,6 +47,11 @@ public class Player : SkeletalEntity {
     private Dictionary<PlayerStateBase, StateBase<Player>> _stateClassesBase = new();
     private Dictionary<PlayerStateCombat, StateBase<Player>> _stateClassesCombat = new();
 
+    private Inventory _inventory = new();
+
+    // For test
+    private SOItem _test1;
+    private SOItem _test2;
 
     private float rayLength = 0.1f;
 
@@ -70,6 +75,9 @@ public class Player : SkeletalEntity {
 
         _stateClassesCombat.Add(PlayerStateCombat.Idle, new IdleStateCombat(this));
         _stateClassesCombat.Add(PlayerStateCombat.Attack, new AttackState(this));
+
+        _test1 = Resources.Load("ScriptableObjects/ItemTest1") as SOItem;
+        _test2 = Resources.Load("ScriptableObjects/ItemTest2") as SOItem;
     }
 
     void Update() {
