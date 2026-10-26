@@ -16,18 +16,14 @@ public class EnemyChaseState : EnemyState
 
     public override void Update()
     {
-        Transform target = EnemyController.Detector.Target;
-
-        if (target == null)
+        if (EnemyController.Detector.Target == null)
         {
             EnemyStateMachine.ChangeState(EnemyController.IdleState);
             return;
         }
 
-        //float distance = Vector3.Distance(EnemyController.transform.position, target.position);
-
         Vector3 enemyPosition = EnemyController.transform.position;
-        Vector3 targetPosition = target.position;
+        Vector3 targetPosition = EnemyController.Detector.Target.position;
 
         enemyPosition.y = 0f;
         targetPosition.y = 0f;
@@ -42,7 +38,7 @@ public class EnemyChaseState : EnemyState
         repathTimer -= Time.deltaTime;
         if (repathTimer <= 0f)
         {
-            EnemyController.Movement.SetDestination(target.position);
+            EnemyController.Movement.SetDestination(EnemyController.Detector.Target.position);
 
             repathTimer = RepathInterval;
         }

@@ -35,6 +35,10 @@ public class EnemyController : MonoBehaviour
         ChaseState = new EnemyChaseState(this, StateMachine);
         AttackState = new EnemyAttackState(this, StateMachine);
         DeadState = new EnemyDeadState(this, StateMachine);
+
+        if (Combat != null) Combat.Initialize(Data);
+
+        if (Movement is NavMeshMovement navMeshMovement) navMeshMovement.Initialize(Data);
     }
 
     private void Start()
@@ -45,5 +49,15 @@ public class EnemyController : MonoBehaviour
     private void Update()
     {
         StateMachine.Update();
+    }
+    
+
+    // 죽은 상태 호출
+    public void EnterDeadState()
+    {
+        if (StateMachine == null || DeadState == null)
+            return;
+
+        StateMachine.ChangeState(DeadState);
     }
 }

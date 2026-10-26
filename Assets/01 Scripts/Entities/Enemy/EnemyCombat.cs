@@ -13,17 +13,13 @@ public class EnemyCombat : MonoBehaviour
 
     public float AttackRange => attackRange;
 
-    private void Start()
+    public void Initialize(EnemyDataSO data)
     {
         detector = GetComponent<EnemyDetector>();
-        EnemyController enemy = GetComponent<EnemyController>();
 
-        if (enemy != null && enemy.Data != null)
-        {
-            attackDamage = enemy.Data.AttackDamage;
-            attackRange = enemy.Data.AttackRange;
-            attackCooldown = enemy.Data.AttackCooldown;
-        }
+            attackDamage = data.AttackDamage;
+            attackRange = data.AttackRange;
+            attackCooldown = data.AttackCooldown;
     }
 
     private void Update()
@@ -70,13 +66,15 @@ public class EnemyCombat : MonoBehaviour
         if (distance > attackRange)
             return;
 
+        Debug.Log($"{gameObject.name}이(가) 플레이어 {target.name}을(를) 공격했습니다!");
+
         // 대상 또는 상위 오브젝트에서 피해 처리 컴포넌트 검색
         MonoBehaviour[] components =
             target.GetComponentsInParent<MonoBehaviour>();
 
         foreach (MonoBehaviour component in components)
         {
-            if (component is IDamageable damageable)
+            if (component is IEnemyDamageable damageable)
             {
                 damageable.TakeDamage(attackDamage);
                 return;

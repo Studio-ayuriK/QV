@@ -15,13 +15,9 @@ public class NavMeshMovement : MonoBehaviour, IEnemyMovement
         agent = GetComponent<NavMeshAgent>();
         agent.stoppingDistance = stoppingDistance;
     }
-    private void Start()
+    public void Initialize(EnemyDataSO data)
     {
-        EnemyController enemy =  GetComponent<EnemyController>();
-        if (enemy != null && enemy.Data != null)
-        {
-            agent.speed = enemy.Data.MoveSpeed;
-        }
+        agent.speed = data.MoveSpeed;
     }
 
     public void SetDestination(Vector3 destination)

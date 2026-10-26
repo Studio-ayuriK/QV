@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class EnemyDeadState : EnemyState
@@ -13,6 +14,7 @@ public class EnemyDeadState : EnemyState
     {
         EnemyController.Movement.Stop();
 
+        Debug.Log($"{EnemyController.name}: DeadState 진입");
         // 추후 사망 애니메이션,
         // 충돌 비활성화 등의 처리를 추가.
     }

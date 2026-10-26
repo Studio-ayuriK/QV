@@ -3050,11 +3050,35 @@ PrefabInstance:
       propertyPath: m_Name
       value: TEST_Enemy
       objectReference: {fileID: 0}
+    - target: {fileID: 7428061075478600307, guid: 563c2b5953c8e844fa2d493163b80f9e, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7428061075478600307, guid: 563c2b5953c8e844fa2d493163b80f9e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8713585728155841901}
   m_SourcePrefab: {fileID: 100100000, guid: 563c2b5953c8e844fa2d493163b80f9e, type: 3}
+--- !u!1 &8713585728155841900 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7428061075478600307, guid: 563c2b5953c8e844fa2d493163b80f9e, type: 3}
+  m_PrefabInstance: {fileID: 8713585728155841899}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8713585728155841901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8713585728155841900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e01a26a7782ff7b499f8971a48d42d66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Enemy
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
