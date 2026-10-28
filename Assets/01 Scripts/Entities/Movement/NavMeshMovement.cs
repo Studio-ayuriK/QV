@@ -15,8 +15,21 @@ public class NavMeshMovement : MonoBehaviour, IEnemyMovement
         agent = GetComponent<NavMeshAgent>();
         agent.stoppingDistance = stoppingDistance;
     }
+    
     public void Initialize(EnemyDataSO data)
     {
+        if (agent == null)
+        {
+            Debug.LogError($"{name}: NavMeshAgent를 찾을 수 없습니다.", this);
+            return;
+        }
+
+        if (data == null)
+        {
+            Debug.LogError($"{name}: EnemyDataSO가 없습니다.", this);
+            return;
+        }
+
         agent.speed = data.MoveSpeed;
     }
 

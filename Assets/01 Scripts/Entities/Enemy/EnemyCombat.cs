@@ -17,9 +17,9 @@ public class EnemyCombat : MonoBehaviour
     {
         detector = GetComponent<EnemyDetector>();
 
-            attackDamage = data.AttackDamage;
-            attackRange = data.AttackRange;
-            attackCooldown = data.AttackCooldown;
+        attackDamage = data.AttackDamage;
+        attackRange = data.AttackRange;
+        attackCooldown = data.AttackCooldown;
     }
 
     private void Update()
@@ -74,11 +74,8 @@ public class EnemyCombat : MonoBehaviour
 
         foreach (MonoBehaviour component in components)
         {
-            if (component is IEnemyDamageable damageable)
-            {
-                damageable.TakeDamage(attackDamage);
-                return;
-            }
+            // 플레이어에게 데미지를 주기
+            
         }
     }
 

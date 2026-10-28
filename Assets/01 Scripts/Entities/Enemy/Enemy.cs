@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Enemy : MonoBehaviour, IEnemyDamageable
+public class Enemy : MonoBehaviour
 {
     public float CurrentHealth { get; private set; }
     public float MaxHealth { get; private set; }
@@ -8,19 +8,21 @@ public class Enemy : MonoBehaviour, IEnemyDamageable
 
     private EnemyController enemyController;
 
-    void Awake()
+    public void Initialize(EnemyController controller)
     {
-        enemyController = GetComponent<EnemyController>();
-
-        if (enemyController == null || enemyController.Data == null)
+        if (controller == null || controller.Data == null)
         {
+            Debug.LogError($"{name}: EnemyController 또는 EnemyDataSO가 없습니다.", this);
             enabled = false;
             return;
         }
 
-        MaxHealth = enemyController.Data.MaxHealth;
+        enemyController = controller;
+        MaxHealth = controller.Data.MaxHealth;
         CurrentHealth = MaxHealth;
+        IsDead = false;
     }
+
     // 받는 데미지
     public void TakeDamage(float damage)
     {

@@ -3,9 +3,12 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour
 {
     #region Enemy AI
-    public EnemyDetector Detector { get; private set; }     // �÷��̾� Ž����
-    public IEnemyMovement Movement { get; private set; }    //  Enemy ������ ����
-    public EnemyCombat Combat { get; private set; }         //  Enemy ��������
+    public Enemy Enemy { get; private set; }
+
+    public EnemyDetector Detector { get; private set; }     
+    public EnemyCombat Combat { get; private set; }
+    public IEnemyMovement Movement { get; private set; }
+
     #endregion
 
     public EnemyStateMachine StateMachine { get; private set; }
@@ -25,9 +28,15 @@ public class EnemyController : MonoBehaviour
 
     private void Awake()
     {
+        Enemy = GetComponent<Enemy>();
         Detector = GetComponent<EnemyDetector>();
         Combat = GetComponent<EnemyCombat>();
         Movement = GetComponent<NavMeshMovement>();
+
+        Enemy.Initialize(this);
+        Combat.Initialize(Data);
+
+        if (Movement is NavMeshMovement navMeshMovement) navMeshMovement.Initialize(Data);
 
         StateMachine = new EnemyStateMachine();
 
@@ -36,9 +45,6 @@ public class EnemyController : MonoBehaviour
         AttackState = new EnemyAttackState(this, StateMachine);
         DeadState = new EnemyDeadState(this, StateMachine);
 
-        if (Combat != null) Combat.Initialize(Data);
-
-        if (Movement is NavMeshMovement navMeshMovement) navMeshMovement.Initialize(Data);
     }
 
     private void Start()
