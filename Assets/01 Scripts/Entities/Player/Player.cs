@@ -78,6 +78,9 @@ public class Player : SkeletalEntity {
 
         _test1 = Resources.Load("ScriptableObjects/ItemTest1") as SOItem;
         _test2 = Resources.Load("ScriptableObjects/ItemTest2") as SOItem;
+
+        _inventory.AddItem(_test1);
+        _inventory.AddItem(_test2);
     }
 
     void Update() {
@@ -109,6 +112,10 @@ public class Player : SkeletalEntity {
         if (Mouse.current.leftButton.wasPressedThisFrame) {
             // SetState(PlayerState.Attack);
         }
+    }
+
+    void OnOpenInventory() {
+        _inventory.ToggleUI();
     }
 
     // 디버그 렌더링 필요하면 구현, 아직 리팩토링 필요한 기능임
