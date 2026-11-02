@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIInventory : UIBase {
     private GameObject _itemObj;
@@ -24,8 +25,10 @@ public class UIInventory : UIBase {
     }
 
     public void UpdateItemList(Dictionary<int, ItemSlot> items) {
-        foreach (var item in items) {
-            _instancedItemObj.Add(Instantiate(_itemObj, _inventoryFrame));
+        foreach (var item in items.Values) {
+            GameObject itemObj = Instantiate(_itemObj, _inventoryFrame);
+            itemObj.GetComponent<Image>().sprite = item.itemData.icon;
+            _instancedItemObj.Add(itemObj);
         }
     }
 }
