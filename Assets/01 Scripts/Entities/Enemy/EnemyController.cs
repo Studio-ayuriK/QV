@@ -34,7 +34,7 @@ public class EnemyController : MonoBehaviour
         Movement = GetComponent<NavMeshMovement>();
 
         Enemy.Initialize(this);
-        Combat.Initialize(Data);
+        Combat.Initialize(Data, Enemy);
 
         if (Movement is NavMeshMovement navMeshMovement) navMeshMovement.Initialize(Data);
 

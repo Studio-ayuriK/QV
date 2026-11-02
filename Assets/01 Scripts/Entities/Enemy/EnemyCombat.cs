@@ -2,24 +2,37 @@ using UnityEngine;
 
 public class EnemyCombat : MonoBehaviour
 {
+    public enum AttackType
+    {
+        Melee,
+        Ranged
+    }
+
     [Header("Combat Settings")]
     [SerializeField] private float attackRange;
-    [SerializeField] private float attackDamage;
+    [SerializeField] private int attackDamage;
     [SerializeField] private float attackCooldown;
 
+    private Enemy enemy;
     private EnemyDetector detector;
+
+    private AttackType attackType;
     private bool isAttacking;
     private float attackTimer;
 
     public float AttackRange => attackRange;
+    public float AttackDamage => attackDamage;
 
-    public void Initialize(EnemyDataSO data)
+    public void Initialize(EnemyDataSO data, Enemy enemy)
     {
+        this.enemy = enemy;
         detector = GetComponent<EnemyDetector>();
 
         attackDamage = data.AttackDamage;
         attackRange = data.AttackRange;
         attackCooldown = data.AttackCooldown;
+
+
     }
 
     private void Update()
@@ -35,21 +48,22 @@ public class EnemyCombat : MonoBehaviour
             attackTimer = attackCooldown;
         }
     }
-
-    public void BeginAttack()
+    // 공격 시작
+    public void BeginAttack(AttackType type)
     {
         if (isAttacking)
             return;
 
+        attackType = type;
         isAttacking = true;
         attackTimer = 0f;
     }
-
+    // 공격 종료
     public void EndAttack()
     {
         isAttacking = false;
     }
-
+    // 공격 수행
     private void PerformAttack()
     {
         Transform target = detector.Target;
@@ -68,15 +82,25 @@ public class EnemyCombat : MonoBehaviour
 
         Debug.Log($"{gameObject.name}이(가) 플레이어 {target.name}을(를) 공격했습니다!");
 
-        // 대상 또는 상위 오브젝트에서 피해 처리 컴포넌트 검색
-        MonoBehaviour[] components =
-            target.GetComponentsInParent<MonoBehaviour>();
-
-        foreach (MonoBehaviour component in components)
+        switch (attackType)
         {
-            // 플레이어에게 데미지를 주기
-            
+            case AttackType.Melee:
+                enemy.ExecuteMeleeAttack();
+                break;
+            case AttackType.Ranged:
+                enemy.ExecuteRangedAttack();
+                break;
         }
+
+        //// 대상 또는 상위 오브젝트에서 피해 처리 컴포넌트 검색
+        //MonoBehaviour[] components =
+        //    target.GetComponentsInParent<MonoBehaviour>();
+
+        //foreach (MonoBehaviour component in components)
+        //{
+        //    // 플레이어에게 데미지를 주기
+
+        //}
     }
 
     private float GetHorizontalDistance(Vector3 a, Vector3 b)
