@@ -9,6 +9,11 @@ public class Enemy : SkeletalEntity
 
     private EnemyController enemyController;
 
+    protected override void Awake()
+    {
+        base.Awake();
+    }
+
     public void Initialize(EnemyController controller)
     {
         if (controller == null || controller.Data == null)
@@ -26,12 +31,12 @@ public class Enemy : SkeletalEntity
 
     protected override void MeleeAttack()
     {
-        // animator.SetTrigger("MeleeAttack");
+        _animator.CrossFade(EnemyAnimationsData.MeleeAttack, 0.1f, 1, 0.0f);
     }
 
     protected override void RangedAttack()
     {
-        //animator.SetTrigger("RangedAttack");
+        _animator.CrossFade(EnemyAnimationsData.RangedAttack, 0.1f, 1, 0.0f);
     }
 
     // 받는 데미지

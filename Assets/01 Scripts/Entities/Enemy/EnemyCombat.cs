@@ -18,6 +18,8 @@ public class EnemyCombat : MonoBehaviour
 
     private AttackType attackType;
     private bool isAttacking;
+    private bool hasAppliedDamage;
+
     private float attackTimer;
 
     public float AttackRange => attackRange;
@@ -62,6 +64,8 @@ public class EnemyCombat : MonoBehaviour
     public void EndAttack()
     {
         isAttacking = false;
+        hasAppliedDamage = false;
+        attackTimer = 0f;
     }
     // 공격 수행
     private void PerformAttack()
@@ -80,6 +84,8 @@ public class EnemyCombat : MonoBehaviour
         if (distance > attackRange)
             return;
 
+        hasAppliedDamage = false;
+
         Debug.Log($"{gameObject.name}이(가) 플레이어 {target.name}을(를) 공격했습니다!");
 
         switch (attackType)
@@ -91,16 +97,29 @@ public class EnemyCombat : MonoBehaviour
                 enemy.ExecuteRangedAttack();
                 break;
         }
+    }
 
-        //// 대상 또는 상위 오브젝트에서 피해 처리 컴포넌트 검색
-        //MonoBehaviour[] components =
-        //    target.GetComponentsInParent<MonoBehaviour>();
+    public void ApplyMeleeDamage()
+    {
+        Transform target = detector.Target;
 
-        //foreach (MonoBehaviour component in components)
-        //{
-        //    // 플레이어에게 데미지를 주기
+        float distance = GetHorizontalDistance(
+            transform.position,
+            target.position
+        );
 
-        //}
+        // 타격 순간에 사거리 재확인
+        if (distance > attackRange)
+            return;
+
+        SkeletalEntity targetEntity = target.GetComponentInParent<SkeletalEntity>();
+
+        targetEntity.TakeDamage(attackDamage);
+
+        hasAppliedDamage = true;
+
+        Debug.Log($"{target.name}에게 {attackDamage}의 피해를 입혔습니다.");
+
     }
 
     private float GetHorizontalDistance(Vector3 a, Vector3 b)

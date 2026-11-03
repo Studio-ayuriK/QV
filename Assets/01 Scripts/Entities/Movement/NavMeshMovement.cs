@@ -12,10 +12,16 @@ public class NavMeshMovement : MonoBehaviour, IEnemyMovement
 
     private void Awake()
     {
-        agent = GetComponent<NavMeshAgent>();
-        agent.stoppingDistance = stoppingDistance;
+        InitializeAgent();
     }
-    
+    private void InitializeAgent()
+    {
+        if (agent == null)
+            agent = GetComponent<NavMeshAgent>();
+
+        if (agent != null)
+            agent.stoppingDistance = stoppingDistance;
+    }
     public void Initialize(EnemyDataSO data)
     {
         if (agent == null)

@@ -36,8 +36,6 @@ public class EnemyController : MonoBehaviour
         Enemy.Initialize(this);
         Combat.Initialize(Data, Enemy);
 
-        if (Movement is NavMeshMovement navMeshMovement) navMeshMovement.Initialize(Data);
-
         StateMachine = new EnemyStateMachine();
 
         IdleState = new EnemyIdleState(this, StateMachine);
@@ -49,6 +47,8 @@ public class EnemyController : MonoBehaviour
 
     private void Start()
     {
+        if (Movement is NavMeshMovement navMeshMovement) navMeshMovement.Initialize(Data);
+
         StateMachine.Initialize(IdleState);
     }
 

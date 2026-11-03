@@ -9,7 +9,7 @@ public class EnemyAttackState : EnemyState
     public override void Enter()
     {
         EnemyController.Movement.Stop();
-        EnemyController.Combat.BeginAttack(EnemyCombat.AttackType.Melee);
+        EnemyController.Combat.BeginAttack(EnemyCombat.AttackType.Ranged);
     }
 
     public override void Update()
