@@ -4,37 +4,27 @@ public class EnemyController : MonoBehaviour
 {
     #region Enemy AI
     public Enemy Enemy { get; private set; }
-
     public EnemyDetector Detector { get; private set; }     
-    public EnemyCombat Combat { get; private set; }
     public IEnemyMovement Movement { get; private set; }
+    public EnemyStateMachine StateMachine { get; private set; }
 
     #endregion
 
-    public EnemyStateMachine StateMachine { get; private set; }
-
-    [Header("Enmey Data")]
-    [SerializeField] private EnemyDataSO enemyData;
-    public EnemyDataSO Data => enemyData;
 
     #region Enemy State
     public EnemyIdleState IdleState { get; private set; }        // 대기
     public EnemyChaseState ChaseState { get; private set; }      // 추격
     public EnemyAttackState AttackState { get; private set; }    // 공격
     public EnemyDeadState DeadState { get; private set; }        // 죽음
-
-
     #endregion
 
     private void Awake()
     {
         Enemy = GetComponent<Enemy>();
         Detector = GetComponent<EnemyDetector>();
-        Combat = GetComponent<EnemyCombat>();
         Movement = GetComponent<NavMeshMovement>();
 
         Enemy.Initialize(this);
-        Combat.Initialize(Data, Enemy);
 
         StateMachine = new EnemyStateMachine();
 
@@ -47,7 +37,7 @@ public class EnemyController : MonoBehaviour
 
     private void Start()
     {
-        if (Movement is NavMeshMovement navMeshMovement) navMeshMovement.Initialize(Data);
+        if (Movement is NavMeshMovement navMeshMovement) navMeshMovement.Initialize(Enemy.MoveSpeed);
 
         StateMachine.Initialize(IdleState);
     }

@@ -9,7 +9,7 @@ public class EnemyAttackState : EnemyState
     public override void Enter()
     {
         EnemyController.Movement.Stop();
-        EnemyController.Combat.BeginAttack(EnemyCombat.AttackType.Ranged);
+        EnemyController.Enemy.BeginAttack();
     }
 
     public override void Update()
@@ -24,7 +24,7 @@ public class EnemyAttackState : EnemyState
 
         float distance = Vector3.Distance(EnemyController.transform.position, target.position);
 
-        if (distance > EnemyController.Combat.AttackRange)
+        if (distance > EnemyController.Enemy.AttackRange)
         {
             EnemyStateMachine.ChangeState(EnemyController.ChaseState);
             return;
@@ -35,6 +35,6 @@ public class EnemyAttackState : EnemyState
 
     public override void Exit()
     {
-        EnemyController.Combat.EndAttack();
+        EnemyController.Enemy.EndAttack();
     }
 }

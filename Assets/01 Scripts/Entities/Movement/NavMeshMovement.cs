@@ -5,15 +5,21 @@ using UnityEngine.AI;
 public class NavMeshMovement : MonoBehaviour, IEnemyMovement
 {
     private NavMeshAgent agent;
+
     [Tooltip("멈추는 거리")]
     [SerializeField] private float stoppingDistance = 1.5f;
     public bool HasReachedDestination =>
-        !agent.pathPending && agent.hasPath && agent.remainingDistance <= agent.stoppingDistance;
+        agent != null &&
+        agent.isOnNavMesh &&
+        !agent.pathPending &&
+        agent.hasPath &&
+        agent.remainingDistance <= agent.stoppingDistance;
 
     private void Awake()
     {
         InitializeAgent();
     }
+
     private void InitializeAgent()
     {
         if (agent == null)
@@ -22,21 +28,18 @@ public class NavMeshMovement : MonoBehaviour, IEnemyMovement
         if (agent != null)
             agent.stoppingDistance = stoppingDistance;
     }
-    public void Initialize(EnemyDataSO data)
+    // Enemy에서 전달받은 이동 속도 적용
+    public void Initialize(float moveSpeed)
     {
+        InitializeAgent();
+
         if (agent == null)
         {
             Debug.LogError($"{name}: NavMeshAgent를 찾을 수 없습니다.", this);
             return;
         }
 
-        if (data == null)
-        {
-            Debug.LogError($"{name}: EnemyDataSO가 없습니다.", this);
-            return;
-        }
-
-        agent.speed = data.MoveSpeed;
+        agent.speed = moveSpeed;
     }
 
     public void SetDestination(Vector3 destination)

@@ -4,15 +4,26 @@ using UnityEngine;
 public class EnemyDetector : MonoBehaviour
 {
     [Header("Detection Settings")]
-    [SerializeField] private float detectionRange = 8f; // °¨Áö ¹üÀ§
-    [SerializeField] private LayerMask playerLayer;     // °¨Áö ÇÒ ÇÃ·¹ÀÌ¾î ·¹ÀÌ¾î
-    [SerializeField] private float scanInterval = 0.2f; // ½ºÄµ °£°İ
+    [SerializeField] private float detectionRange = 8f; // ê°ì§€ ë²”ìœ„
+    [SerializeField] private LayerMask playerLayer;     // ê°ì§€ í•  í”Œë ˆì´ì–´ ë ˆì´ì–´
+    [SerializeField] private float scanInterval = 0.2f; // ìŠ¤ìº” ê°„ê²©
 
     public Transform Target { get; private set; }
 
     private readonly Collider[] results = new Collider[32];
     private float scanTimer;
 
+    private void Awake()
+    {
+        if (playerLayer.value == 0)
+        {
+            Debug.LogWarning(
+                $"{name}: Player LayerMaskê°€ ì„¤ì •ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.",
+                this
+            );
+        }
+
+    }
     // Update is called once per frame
     void Update()
     {
@@ -26,13 +37,19 @@ public class EnemyDetector : MonoBehaviour
 
     private void DetectPlayer()
     {
-        // ÇöÀç Å¸ÄÏÀÌ °¨Áö ¹üÀ§¿¡ ¹ş¾î³µ´ÂÁö È®ÀÎ
-        if (Target != null && GetHorizontalDistance(transform.position, Target.position)
-            > detectionRange)
+        // ê¸°ì¡´ íƒ€ê¹ƒ ìœ íš¨ì„± í™•ì¸
+        if (Target != null)
         {
-            Target = null;
+            if (!Target.gameObject.activeInHierarchy ||
+                GetHorizontalDistance(transform.position, Target.position) > detectionRange)
+            {
+                Target = null;
+            }
+            else
+            {
+                return;
+            }
         }
-        if (Target != null) return;
 
         int count = Physics.OverlapSphereNonAlloc(
             transform.position, detectionRange,
@@ -51,7 +68,7 @@ public class EnemyDetector : MonoBehaviour
 
             Transform candidate = hit.transform;
 
-            // ÇÃ·¹ÀÌ¾î Äİ¶óÀÌ´õ°¡ ÀÚ½Ä ¿ÀºêÁ§Æ®¿¡ ÀÖ´Â °æ¿ìµµ Ã³¸®
+            // í”Œë ˆì´ì–´ ì½œë¼ì´ë”ê°€ ìì‹ ì˜¤ë¸Œì íŠ¸ì— ìˆëŠ” ê²½ìš°ë„ ì²˜ë¦¬
             if (!candidate.CompareTag("Player"))
                 candidate = candidate.root;
 

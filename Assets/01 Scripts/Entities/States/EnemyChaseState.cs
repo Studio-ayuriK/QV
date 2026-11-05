@@ -30,7 +30,7 @@ public class EnemyChaseState : EnemyState
 
         float distance = Vector3.Distance(enemyPosition, targetPosition);
 
-        if (distance <= EnemyController.Combat.AttackRange)
+        if (distance <= EnemyController.Enemy.AttackRange)
         {
             EnemyStateMachine.ChangeState(EnemyController.AttackState);
             return;

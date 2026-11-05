@@ -7,34 +7,36 @@ public class EnemyCombat : MonoBehaviour
         Melee,
         Ranged
     }
+    [Header("Attack Settings")]
+    [SerializeField] private AttackType attackType;
 
-    [Header("Combat Settings")]
-    [SerializeField] private float attackRange;
-    [SerializeField] private int attackDamage;
-    [SerializeField] private float attackCooldown;
+    private const int UpperBodyLayer = 1;
+
+    [Header("Animation Settings")]
+    [SerializeField] private float crossFadeDuration = 0.1f;
+
+    [Header("Ranged Attack Settings")]
+    [SerializeField] private EnemyProjectile projectilePrefab;
+    [SerializeField] private Transform projectileSpawnPoint;
+    [SerializeField] private float projectileAimHeight = 0.8f;
 
     private Enemy enemy;
     private EnemyDetector detector;
+    private Animator animator;
 
-    private AttackType attackType;
     private bool isAttacking;
     private bool hasAppliedDamage;
+    private bool hasFiredProjectile;
 
     private float attackTimer;
 
-    public float AttackRange => attackRange;
-    public float AttackDamage => attackDamage;
+    public AttackType CurrentAttackType => attackType;
 
-    public void Initialize(EnemyDataSO data, Enemy enemy)
+    public void Initialize(Enemy enemy)
     {
         this.enemy = enemy;
         detector = GetComponent<EnemyDetector>();
-
-        attackDamage = data.AttackDamage;
-        attackRange = data.AttackRange;
-        attackCooldown = data.AttackCooldown;
-
-
+        animator = GetComponent<Animator>();
     }
 
     private void Update()
@@ -42,31 +44,50 @@ public class EnemyCombat : MonoBehaviour
         if (!isAttacking)
             return;
 
+        if (enemy == null || enemy.IsDead)
+        {
+            EndAttack();
+            return;
+
+        }
+
         attackTimer -= Time.deltaTime;
 
         if (attackTimer <= 0f)
         {
             PerformAttack();
-            attackTimer = attackCooldown;
+            attackTimer = enemy.AttackCooldown;
         }
     }
-    // 공격 시작
-    public void BeginAttack(AttackType type)
+
+    #region Attack Control
+    // Inspector에서 설정한 공격 방식으로 시작
+    public void BeginAttack()
     {
-        if (isAttacking)
+        if (isAttacking || enemy == null || enemy.IsDead)
             return;
 
-        attackType = type;
+
         isAttacking = true;
         attackTimer = 0f;
+
+        hasAppliedDamage = false;
+        hasFiredProjectile = false;
     }
+
     // 공격 종료
     public void EndAttack()
     {
         isAttacking = false;
+
         hasAppliedDamage = false;
+        hasFiredProjectile = false;
+
         attackTimer = 0f;
     }
+
+    #endregion
+
     // 공격 수행
     private void PerformAttack()
     {
@@ -80,46 +101,153 @@ public class EnemyCombat : MonoBehaviour
             target.position
         );
 
-        // 공격 실행 직전에 사거리 재확인
-        if (distance > attackRange)
+        // 공격 시작 전 사거리 확인
+        if (distance > enemy.AttackRange)
             return;
 
         hasAppliedDamage = false;
-
-        Debug.Log($"{gameObject.name}이(가) 플레이어 {target.name}을(를) 공격했습니다!");
+        hasFiredProjectile = false;
 
         switch (attackType)
         {
             case AttackType.Melee:
-                enemy.ExecuteMeleeAttack();
+                PlayMeleeAttack();
                 break;
             case AttackType.Ranged:
-                enemy.ExecuteRangedAttack();
+                PlayRangedAttack();
                 break;
         }
     }
 
-    public void ApplyMeleeDamage()
+    // 근접 공격 애니메이션
+    private void PlayMeleeAttack()
     {
+        animator.CrossFade(EnemyAnimationsData.MeleeAttack, crossFadeDuration, UpperBodyLayer,0f);
+    }
+
+    // 원거리 공격 애니메이션
+    private void PlayRangedAttack()
+    {
+        animator.CrossFade(EnemyAnimationsData.RangedAttack, crossFadeDuration, UpperBodyLayer,0f);
+    }
+
+    #region Melee Attack
+
+    // 근접 공격 Animation Event
+    public void AnimationEvent_MeleeHit()
+    {
+        if (!isAttacking || attackType != AttackType.Melee)
+            return;
+
+        if (hasAppliedDamage)
+            return;
+
+        if (!TryGetTarget(out SkeletalEntity targetEntity))
+            return;
+
+        // 중복 피해 방지
+        hasAppliedDamage = true;
+
+        targetEntity.TakeDamage(enemy.AttackDamage);
+
+        Debug.Log(
+            $"{targetEntity.name}에게 {enemy.AttackDamage}의 근접 피해"
+        );
+    }
+
+    #endregion
+
+    #region Ranged Attack
+
+    // 원거리 공격 Animation Event
+    public void AnimationEvent_RangedFire()
+    {
+        if (!isAttacking || attackType != AttackType.Ranged)
+            return;
+
+        if (hasFiredProjectile)
+            return;
+
+        if (enemy == null || enemy.IsDead || detector == null)
+            return;
+
+        if (projectilePrefab == null || projectileSpawnPoint == null)
+        {
+            Debug.LogError($"{name}: 투사체 또는 발사 위치가 설정되지 않았습니다.", this);
+            return;
+        }
+
         Transform target = detector.Target;
+
+        if (target == null)
+            return;
 
         float distance = GetHorizontalDistance(
             transform.position,
             target.position
         );
 
-        // 타격 순간에 사거리 재확인
-        if (distance > attackRange)
+        if (distance > enemy.AttackRange)
             return;
 
-        SkeletalEntity targetEntity = target.GetComponentInParent<SkeletalEntity>();
+        // 플레이어의 상체 방향을 목표로 설정
+        Vector3 targetPosition =
+            target.position + Vector3.up * projectileAimHeight;
 
-        targetEntity.TakeDamage(attackDamage);
+        Vector3 direction =
+            targetPosition - projectileSpawnPoint.position;
 
-        hasAppliedDamage = true;
+        if (direction.sqrMagnitude <= 0.001f)
+            return;
 
-        Debug.Log($"{target.name}에게 {attackDamage}의 피해를 입혔습니다.");
+        Quaternion rotation = Quaternion.LookRotation(direction.normalized);
 
+        // 투사체 생성
+        EnemyProjectile projectile = Instantiate(
+            projectilePrefab,
+            projectileSpawnPoint.position,
+            rotation
+        );
+
+        // 투사체에 공격력과 발사 방향 전달
+        projectile.Initialize(
+            enemy,
+            enemy.AttackDamage,
+            direction.normalized
+        );
+
+        hasFiredProjectile = true;
+
+        Debug.Log(
+            $"{name} 원거리 투사체 발사! 공격력: {enemy.AttackDamage}"
+        );
+    }
+
+    #endregion
+    // 타깃 확인 및 사거리 검사
+    private bool TryGetTarget(out SkeletalEntity targetEntity)
+    {
+        targetEntity = null;
+
+        if (enemy == null || enemy.IsDead || detector == null)
+            return false;
+
+        Transform target = detector.Target;
+
+        if (target == null)
+            return false;
+
+        float distance = GetHorizontalDistance(
+            transform.position,
+            target.position
+        );
+
+        if (distance > enemy.AttackRange)
+            return false;
+
+        targetEntity = target.GetComponentInParent<SkeletalEntity>();
+
+        return targetEntity != null && targetEntity != enemy;
     }
 
     private float GetHorizontalDistance(Vector3 a, Vector3 b)
