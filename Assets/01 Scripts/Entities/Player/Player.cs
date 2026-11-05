@@ -76,11 +76,12 @@ public class Player : SkeletalEntity {
         _stateClassesCombat.Add(PlayerStateCombat.Idle, new IdleStateCombat(this));
         _stateClassesCombat.Add(PlayerStateCombat.Attack, new AttackState(this));
 
-        _test1 = Resources.Load("ScriptableObjects/ItemTest1") as SOItem;
-        _test2 = Resources.Load("ScriptableObjects/ItemTest2") as SOItem;
+        // 인벤토리 테스트 코드
+        //_test1 = Resources.Load("ScriptableObjects/ItemTest1") as SOItem;
+        //_test2 = Resources.Load("ScriptableObjects/ItemTest2") as SOItem;
 
-        _inventory.AddItem(_test1);
-        _inventory.AddItem(_test2);
+        //_inventory.AddItem(_test1);
+        //_inventory.AddItem(_test2);
     }
 
     void Update() {
