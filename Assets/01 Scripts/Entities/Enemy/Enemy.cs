@@ -16,7 +16,7 @@ public class Enemy : SkeletalEntity
     private int attackDamage;
 
     private float enemyMoveSpeed;
-    [SerializeField] private float attackRange;
+    private float attackRange;
     private float attackCooldown;
 
     public int MaxHealth => maxHealth;

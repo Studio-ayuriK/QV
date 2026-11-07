@@ -24,7 +24,11 @@ public class EnemyController : MonoBehaviour
         Detector = GetComponent<EnemyDetector>();
         Movement = GetComponent<NavMeshMovement>();
 
-        Enemy.Initialize(this);
+        if (!Enemy.Initialize(this))
+        {
+            enabled = false;
+            return;
+        }
 
         StateMachine = new EnemyStateMachine();
 

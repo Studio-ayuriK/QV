@@ -16,31 +16,46 @@ public class EnemyChaseState : EnemyState
 
     public override void Update()
     {
-        if (EnemyController.Detector.Target == null)
+        Transform target = EnemyController.Detector.Target;
+
+        // 플레이어를 놓친 경우
+        if (target == null)
         {
-            EnemyStateMachine.ChangeState(EnemyController.IdleState);
+            EnemyStateMachine.ChangeState(
+                EnemyController.IdleState
+            );
+
             return;
         }
 
-        Vector3 enemyPosition = EnemyController.transform.position;
-        Vector3 targetPosition = EnemyController.Detector.Target.position;
+        float distance = GetHorizontalDistance(
+            EnemyController.transform.position,
+            target.position
+        );
 
-        enemyPosition.y = 0f;
-        targetPosition.y = 0f;
-
-        float distance = Vector3.Distance(enemyPosition, targetPosition);
-
+        // 공격 사거리 진입
         if (distance <= EnemyController.Enemy.AttackRange)
         {
-            EnemyStateMachine.ChangeState(EnemyController.AttackState);
+            EnemyStateMachine.ChangeState(
+                EnemyController.AttackState
+            );
+
             return;
         }
+
+        // 일정 간격으로 목적지 갱신
         repathTimer -= Time.deltaTime;
+
         if (repathTimer <= 0f)
         {
-            EnemyController.Movement.SetDestination(EnemyController.Detector.Target.position);
+            EnemyController.Movement.SetDestination(target.position);
 
             repathTimer = RepathInterval;
         }
+    }
+
+    public override void Exit()
+    {
+        EnemyController.Movement.Stop();
     }
 }
