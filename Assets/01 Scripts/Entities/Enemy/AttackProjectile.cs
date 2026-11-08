@@ -2,7 +2,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(SphereCollider))]
-public class EnemyProjectile : MonoBehaviour
+public class AttackProjectile : MonoBehaviour
 {
     [Header("Projectile Settings")]
     [SerializeField] private float moveSpeed = 12f;

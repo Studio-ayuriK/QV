@@ -343,4 +343,8 @@ public class Player : SkeletalEntity {
             }
         }
     }
+
+    public Vector3 LookDirection => _lookDir;
+    public Vector3 AttackPointOffset => _attackPointOffset;
+    public Vector3 AttackRange => _attackRange;
 }

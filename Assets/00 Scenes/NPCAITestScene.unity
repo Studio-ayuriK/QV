@@ -3082,8 +3082,33 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3261633062426577393, guid: d928094f0e8a075478fbaeee65058854, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5165255204597083113}
   m_SourcePrefab: {fileID: 100100000, guid: d928094f0e8a075478fbaeee65058854, type: 3}
+--- !u!1 &5165255204597083112 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3261633062426577393, guid: d928094f0e8a075478fbaeee65058854, type: 3}
+  m_PrefabInstance: {fileID: 5165255204597083111}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5165255204597083113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5165255204597083112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbb84e8aba4297141975c09267160026, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyCombat
+  attackType: 1
+  crossFadeDuration: 0.1
+  projectilePrefab: {fileID: 2345309099837984033, guid: f52f4b2676ddab248a673175b1a9b90a, type: 3}
+  projectileSpawnPoint: {fileID: 804929512}
+  projectileAimHeight: 0.8
 --- !u!1001 &8713585728155841899
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3175,12 +3200,6 @@ MonoBehaviour:
   moveSpeed: 6
   rotationSpeed: 20
   enemyData: {fileID: 0}
-  attackRange: 0
-  attackType: 0
-  crossFadeDuration: 0.1
-  projectilePrefab: {fileID: 0}
-  projectileSpawnPoint: {fileID: 0}
-  projectileAimHeight: 0.8
 --- !u!114 &8713585728155841902
 MonoBehaviour:
   m_ObjectHideFlags: 0

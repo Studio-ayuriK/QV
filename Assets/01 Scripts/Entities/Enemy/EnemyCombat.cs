@@ -1,78 +1,140 @@
 using UnityEngine;
+using static AttackStrategies;
 
-public class EnemyCombat : MonoBehaviour
+public class EnemyCombat : CombatBase
 {
-    public enum AttackType
-    {
-        Melee,
-        Ranged
-    }
+    #region Attack Settings
+
     [Header("Attack Settings")]
-    [SerializeField] private AttackType attackType;
+    [SerializeField]
+    private AttackType attackType = AttackType.Melee;
 
     private const int UpperBodyLayer = 1;
 
     [Header("Animation Settings")]
-    [SerializeField] private float crossFadeDuration = 0.1f;
+    [SerializeField]
+    private float crossFadeDuration = 0.1f;
 
     [Header("Ranged Attack Settings")]
-    [SerializeField] private EnemyProjectile projectilePrefab;
-    [SerializeField] private Transform projectileSpawnPoint;
-    [SerializeField] private float projectileAimHeight = 0.8f;
+    [SerializeField]
+    private AttackProjectile projectilePrefab;
+
+    [SerializeField]
+    private Transform projectileSpawnPoint;
+
+    [SerializeField]
+    private float projectileAimHeight = 0.8f;
+
+    #endregion
+
+    #region Components
 
     private Enemy enemy;
     private EnemyDetector detector;
     private Animator animator;
 
-    private bool isAttacking;
-    private bool hasAppliedDamage;
-    private bool hasFiredProjectile;
+    #endregion
+
+    #region Strategy Pattern
+    private IAttackStrategy meleeStrategy;
+    private IAttackStrategy rangedStrategy;
+    #endregion
+
+    #region Attack Status
+
+    private bool isAttacking;               // 현재 공격 중인지 여부
+    private bool isAttackAnimationPlaying;  // 공격 애니메이션이 재생 중인지 여부
+    private bool hasExecutedAttack;         // 공격이 실제로 수행되었는지 여부
 
     private float attackTimer;
 
     public AttackType CurrentAttackType => attackType;
+    public bool IsAttacking => isAttacking;
 
-    public void Initialize(Enemy enemy)
+    private bool isInitialized;
+
+    #endregion
+
+    // 초기화
+    public bool Initialize(Enemy enemy)
     {
+        if (isInitialized) return true;
+
+        if (enemy == null) return false;
+        
         this.enemy = enemy;
-        detector = GetComponent<EnemyDetector>();
-        animator = GetComponent<Animator>();
+        owner = enemy;
+        
+        detector = enemy.GetComponent<EnemyDetector>();
+        animator = enemy.Animator;
+
+        if (detector == null || animator == null) return false;
+
+        // 근접 공격 전략 초기화
+        meleeStrategy = new MeleeAttackStrategy();
+
+        // 원거리 공격 전략 초기화
+        if (attackType == AttackType.Ranged)
+        {
+            if (projectilePrefab == null || projectileSpawnPoint == null)
+            {
+                Debug.LogError($"{name}: 투사체 또는 생성 위치가 설정되지 않았습니다.", this);
+                return false;
+            }
+
+            rangedStrategy = new RangedAttackStrategy(
+                projectilePrefab,
+                projectileSpawnPoint,
+                projectileAimHeight
+            );
+        }
+
+        isInitialized = true;
+
+        return true;
     }
 
     private void Update()
     {
-        if (!isAttacking)
+        if (!isInitialized || !isAttacking)
             return;
 
         if (enemy == null || enemy.IsDead)
         {
             EndAttack();
             return;
-
         }
 
-        attackTimer -= Time.deltaTime;
+        if (attackTimer > 0f)
+            attackTimer -= Time.deltaTime;
 
+        if (isAttackAnimationPlaying) return;
+        
         if (attackTimer <= 0f)
         {
-            PerformAttack();
-            attackTimer = enemy.AttackCooldown;
+            if (PerformAttack())
+            {
+                // 쿨다운이 0일 때 매 프레임 공격하는 것 방지
+                attackTimer = Mathf.Max(enemy.AttackCooldown, 0.05f);
+            }
+            else attackTimer = 0.1f; // 공격 실패 시 짧은 딜레이를 줘서 반복 공격 방지
         }
     }
 
     #region Attack Control
-    // Inspector에서 설정한 공격 방식으로 시작
+
+    // 공격 시작
     public void BeginAttack()
     {
-        if (isAttacking || enemy == null || enemy.IsDead)
+        if (!isInitialized || isAttacking || enemy.IsDead)
             return;
 
-
         isAttacking = true;
+        
         attackTimer = 0f;
 
-        hasAppliedDamage = false;
-        hasFiredProjectile = false;
+        hasExecutedAttack = false;
+        isAttackAnimationPlaying = false;
     }
 
     // 공격 종료
@@ -80,150 +142,146 @@ public class EnemyCombat : MonoBehaviour
     {
         isAttacking = false;
 
-        hasAppliedDamage = false;
-        hasFiredProjectile = false;
+        hasExecutedAttack = false;
+        isAttackAnimationPlaying = false;
 
         attackTimer = 0f;
     }
 
     #endregion
 
+    #region Attack Execution
+
     // 공격 수행
-    private void PerformAttack()
+    private bool PerformAttack()
     {
-        Transform target = detector.Target;
+        if (detector == null || animator == null)
+            return false;
 
-        if (target == null)
-            return;
+        if (!TryGetTarget(out SkeletalEntity target))
+            return false;
 
-        float distance = GetHorizontalDistance(
-            transform.position,
-            target.position
-        );
+        Debug.Log($"{name}: 공격 시작 - {target.name}");
 
-        // 공격 시작 전 사거리 확인
-        if (distance > enemy.AttackRange)
-            return;
-
-        hasAppliedDamage = false;
-        hasFiredProjectile = false;
+        hasExecutedAttack = false;
+        isAttackAnimationPlaying = true;
 
         switch (attackType)
         {
             case AttackType.Melee:
                 PlayMeleeAttack();
                 break;
+
             case AttackType.Ranged:
                 PlayRangedAttack();
                 break;
+
+            default:
+                isAttackAnimationPlaying = false;
+                return false;
         }
+
+        return true;
     }
 
     // 근접 공격 애니메이션
     private void PlayMeleeAttack()
     {
-        animator.CrossFade(EnemyAnimationsData.MeleeAttack, crossFadeDuration, UpperBodyLayer,0f);
+        animator.CrossFade(
+            EnemyAnimationsData.MeleeAttack, crossFadeDuration, GetAttackAnimationLayer(), 0f);
     }
 
     // 원거리 공격 애니메이션
     private void PlayRangedAttack()
     {
-        animator.CrossFade(EnemyAnimationsData.RangedAttack, crossFadeDuration, UpperBodyLayer,0f);
+        animator.CrossFade(
+            EnemyAnimationsData.RangedAttack, crossFadeDuration, GetAttackAnimationLayer(), 0f);
     }
+
+    // Animator 레이어 확인
+    private int GetAttackAnimationLayer()
+    {
+        return animator.layerCount > UpperBodyLayer ? UpperBodyLayer : 0;
+    }
+    #endregion
+
+    #region Animation Events
+
+    // 근접 공격 Animation Event
+    public void AnimationEvent_MeleeAttack()
+    {
+        Debug.Log($"{name}: 근접 공격 Animation Event 실행");
+
+
+        if (!isAttacking || 
+            !isAttackAnimationPlaying ||
+            attackType != AttackType.Melee ||
+            hasExecutedAttack)
+            return;
+
+        MeleeAttack();
+    }
+
+    // 원거리 공격 Animation Event
+    public void AnimationEvent_RangedAttack()
+    {
+        Debug.Log($"{name}: 근접 공격 Animation Event 실행");
+
+        if (!isAttacking || 
+            !isAttackAnimationPlaying ||
+            attackType != AttackType.Ranged ||
+            hasExecutedAttack)
+            return;
+
+        RangedAttack();
+    }
+
+    // 공격 애니메이션 종료 Animation Event
+    public void AnimationEvent_AttackFinished()
+    {
+        isAttackAnimationPlaying = false;
+    }
+
+    #endregion
 
     #region Melee Attack
 
-    // 근접 공격 Animation Event
-    public void AnimationEvent_MeleeHit()
+    // 실제 근접 공격
+    private void MeleeAttack()
     {
-        if (!isAttacking || attackType != AttackType.Melee)
-            return;
+        if (enemy.IsDead || hasExecutedAttack) return;
 
-        if (hasAppliedDamage)
-            return;
+        if (!TryGetTarget(out SkeletalEntity target)) return;
 
-        if (!TryGetTarget(out SkeletalEntity targetEntity))
-            return;
+        if (meleeStrategy == null) return;
 
-        // 중복 피해 방지
-        hasAppliedDamage = true;
+        hasExecutedAttack = true;
 
-        targetEntity.TakeDamage(enemy.AttackDamage);
-
-        Debug.Log(
-            $"{targetEntity.name}에게 {enemy.AttackDamage}의 근접 피해"
-        );
+        ExecuteAttack(meleeStrategy, target, enemy.AttackDamage);
     }
 
     #endregion
 
     #region Ranged Attack
 
-    // 원거리 공격 Animation Event
-    public void AnimationEvent_RangedFire()
+    // 실제 원거리 공격
+    private void RangedAttack()
     {
-        if (!isAttacking || attackType != AttackType.Ranged)
+        if (enemy.IsDead || hasExecutedAttack) return;
+
+        if (!TryGetTarget(out SkeletalEntity target))
             return;
+        if (rangedStrategy == null) return;
 
-        if (hasFiredProjectile)
-            return;
+        hasExecutedAttack = true;
 
-        if (enemy == null || enemy.IsDead || detector == null)
-            return;
-
-        if (projectilePrefab == null || projectileSpawnPoint == null)
-        {
-            Debug.LogError($"{name}: 투사체 또는 발사 위치가 설정되지 않았습니다.", this);
-            return;
-        }
-
-        Transform target = detector.Target;
-
-        if (target == null)
-            return;
-
-        float distance = GetHorizontalDistance(
-            transform.position,
-            target.position
-        );
-
-        if (distance > enemy.AttackRange)
-            return;
-
-        // 플레이어의 상체 방향을 목표로 설정
-        Vector3 targetPosition =
-            target.position + Vector3.up * projectileAimHeight;
-
-        Vector3 direction =
-            targetPosition - projectileSpawnPoint.position;
-
-        if (direction.sqrMagnitude <= 0.001f)
-            return;
-
-        Quaternion rotation = Quaternion.LookRotation(direction.normalized);
-
-        // 투사체 생성
-        EnemyProjectile projectile = Instantiate(
-            projectilePrefab,
-            projectileSpawnPoint.position,
-            rotation
-        );
-
-        // 투사체에 공격력과 발사 방향 전달
-        projectile.Initialize(
-            enemy,
-            enemy.AttackDamage,
-            direction.normalized
-        );
-
-        hasFiredProjectile = true;
-
-        Debug.Log(
-            $"{name} 원거리 투사체 발사! 공격력: {enemy.AttackDamage}"
-        );
+        ExecuteAttack(rangedStrategy, target, enemy.AttackDamage);
     }
 
     #endregion
+
+    #region Target & Distance
+
     // 타깃 확인 및 사거리 검사
     private bool TryGetTarget(out SkeletalEntity targetEntity)
     {
@@ -237,19 +295,25 @@ public class EnemyCombat : MonoBehaviour
         if (target == null)
             return false;
 
+        SkeletalEntity foundTarget =
+            target.GetComponentInParent<SkeletalEntity>();
+
+        if (foundTarget == null || foundTarget == enemy) return false;
+
+        if (foundTarget.IsDead) return false;
+
         float distance = GetHorizontalDistance(
             transform.position,
-            target.position
+            foundTarget.transform.position
         );
+        if (distance > enemy.AttackRange) return false;
 
-        if (distance > enemy.AttackRange)
-            return false;
+        targetEntity = foundTarget;
 
-        targetEntity = target.GetComponentInParent<SkeletalEntity>();
-
-        return targetEntity != null && targetEntity != enemy;
+        return true;
     }
 
+    // 수평 거리 계산
     private float GetHorizontalDistance(Vector3 a, Vector3 b)
     {
         a.y = 0f;
@@ -257,4 +321,6 @@ public class EnemyCombat : MonoBehaviour
 
         return Vector3.Distance(a, b);
     }
+
+    #endregion
 }

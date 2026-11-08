@@ -1,5 +1,7 @@
 using UnityEngine;
 
+[RequireComponent(typeof(EnemyDetector))]
+[RequireComponent(typeof(EnemyCombat))]
 public class EnemyController : MonoBehaviour
 {
     #region Enemy AI
@@ -7,7 +9,7 @@ public class EnemyController : MonoBehaviour
     public EnemyDetector Detector { get; private set; }     
     public IEnemyMovement Movement { get; private set; }
     public EnemyStateMachine StateMachine { get; private set; }
-
+    public EnemyCombat Combat { get; private set; }
     #endregion
 
 
@@ -22,7 +24,18 @@ public class EnemyController : MonoBehaviour
     {
         Enemy = GetComponent<Enemy>();
         Detector = GetComponent<EnemyDetector>();
+        Combat = GetComponent<EnemyCombat>();   
         Movement = GetComponent<NavMeshMovement>();
+
+        // 필수 컴포넌트 확인
+        if (Enemy == null || Detector == null ||
+            Combat == null || Movement == null)
+        {
+            Debug.LogError($"{name}: 필요한 컴포넌트가 없습니다.", this);
+
+            enabled = false;
+            return;
+        }
 
         if (!Enemy.Initialize(this))
         {
@@ -30,6 +43,13 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
+        if(!Combat.Initialize(Enemy))
+        {
+            enabled = false;
+            return;
+        }
+
+        // 상태 머신 초기화
         StateMachine = new EnemyStateMachine();
 
         IdleState = new EnemyIdleState(this, StateMachine);

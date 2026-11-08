@@ -13,7 +13,7 @@ public class EnemyDeadState : EnemyState
 
     public override void Enter()
     {
-        EnemyController.Enemy.EndAttack();
+        EnemyController.Combat.EndAttack();
         EnemyController.Movement.Stop();
         EnemyController.Detector.enabled = false;
 

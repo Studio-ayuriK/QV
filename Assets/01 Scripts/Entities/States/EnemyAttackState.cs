@@ -9,7 +9,7 @@ public class EnemyAttackState : EnemyState
     public override void Enter()
     {
         EnemyController.Movement.Stop();
-        EnemyController.Enemy.BeginAttack();
+        EnemyController.Combat.BeginAttack();
     }
 
     public override void Update()
@@ -37,6 +37,6 @@ public class EnemyAttackState : EnemyState
 
     public override void Exit()
     {
-        EnemyController.Enemy.EndAttack();
+        EnemyController.Combat.EndAttack();
     }
 }
