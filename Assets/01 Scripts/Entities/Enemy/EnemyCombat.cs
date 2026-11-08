@@ -161,7 +161,7 @@ public class EnemyCombat : CombatBase
         if (!TryGetTarget(out SkeletalEntity target))
             return false;
 
-        Debug.Log($"{name}: 공격 시작 - {target.name}");
+        //Debug.Log($"{name}: 공격 시작 - {target.name}");
 
         hasExecutedAttack = false;
         isAttackAnimationPlaying = true;
@@ -225,7 +225,7 @@ public class EnemyCombat : CombatBase
     // 원거리 공격 Animation Event
     public void AnimationEvent_RangedAttack()
     {
-        Debug.Log($"{name}: 근접 공격 Animation Event 실행");
+        //Debug.Log($"{name}: 원거리 공격 Animation Event 실행");
 
         if (!isAttacking || 
             !isAttackAnimationPlaying ||

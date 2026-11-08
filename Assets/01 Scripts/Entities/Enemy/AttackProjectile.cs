@@ -98,9 +98,9 @@ public class AttackProjectile : MonoBehaviour
         {
             target.TakeDamage(damage);
 
-            Debug.Log(
-                $"{target.name}에게 투사체 피해 {damage}"
-            );
+            //Debug.Log(
+            //    $"{target.name}에게 투사체 피해 {damage}"
+            //);
         }
 
         // 대상 또는 환경에 충돌하면 제거

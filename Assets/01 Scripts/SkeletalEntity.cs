@@ -50,9 +50,7 @@ public abstract class SkeletalEntity : MonoBehaviour {
 
         CurrentHealth = Mathf.Max(0, CurrentHealth - damage);
 
-        Debug.Log(
-            $"{name}이 {damage}의 피해를 받았습니다. 남은 체력: {CurrentHealth}"
-        );
+        //Debug.Log($"{name}이 {damage}의 피해를 받았습니다. 남은 체력: {CurrentHealth}");
 
         if (CurrentHealth <= 0)
             Die();
