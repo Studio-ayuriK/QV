@@ -30435,10 +30435,10 @@ AnimationClip:
   m_HasGenericRootTransform: 0
   m_HasMotionFloatCurves: 0
   m_Events:
-  - time: 0.23333333
-    functionName: AttackOneHand
+  - time: 0.2
+    functionName: AnimationEvent_MeleeAttack
     data: 
-    objectReferenceParameter: {fileID: 11500000, guid: 3acae45f23731ee459c74a7e6b3900e4, type: 3}
+    objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0

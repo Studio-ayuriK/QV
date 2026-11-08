@@ -16,21 +16,23 @@ public class EnemyAttackState : EnemyState
     {
         Transform target = EnemyController.Detector.Target;
 
+        // 플레이어를 놓친 경우
         if (target == null)
         {
             EnemyStateMachine.ChangeState(EnemyController.IdleState);
             return;
         }
 
-        float distance = Vector3.Distance(EnemyController.transform.position, target.position);
-
-        if (distance > EnemyController.Combat.AttackRange)
+        float distance = GetHorizontalDistance(
+            EnemyController.transform.position,
+            target.position
+        );
+        // 공격 사거리 이탈
+        if (distance > EnemyController.Enemy.AttackRange)
         {
             EnemyStateMachine.ChangeState(EnemyController.ChaseState);
             return;
         }
-
-        //EnemyController.Movement.SetDestination(target.position);
     }
 
     public override void Exit()

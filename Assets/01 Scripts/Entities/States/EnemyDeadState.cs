@@ -9,10 +9,13 @@ public class EnemyDeadState : EnemyState
         : base(enemyController, enemyStateMachine)
     {
     }
+    public override bool IsTerminal => true;
 
     public override void Enter()
     {
+        EnemyController.Combat.EndAttack();
         EnemyController.Movement.Stop();
+        EnemyController.Detector.enabled = false;
 
         Debug.Log($"{EnemyController.name}: DeadState 진입");
         // 추후 사망 애니메이션,

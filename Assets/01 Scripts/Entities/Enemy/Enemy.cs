@@ -1,50 +1,129 @@
 using UnityEngine;
+using UnityEngine.AI;
 
-public class Enemy : MonoBehaviour
+[RequireComponent(typeof(EnemyController))]
+public class Enemy : SkeletalEntity
 {
-    public float CurrentHealth { get; private set; }
-    public float MaxHealth { get; private set; }
-    public bool IsDead { get; private set; }
+    #region Enemy Data
+
+    [Header("Enemy Data")]
+    [SerializeField] private EnemyDataSO enemyData;
+
+    private int attackDamage;
+
+    private float enemyMoveSpeed;
+    private float attackRange;
+    private float attackCooldown;
+
+    public int AttackDamage => attackDamage;
+    public float MoveSpeed => enemyMoveSpeed;
+    public float AttackRange => attackRange;
+    public float AttackCooldown => attackCooldown;
+    #endregion
 
     private EnemyController enemyController;
+    private bool isInitialized;
 
-    public void Initialize(EnemyController controller)
+    [Header("Gizmo Settings")]
+    [SerializeField]
+    private Color attackRangeColor = Color.cyan;
+
+    // 초기화
+    public bool Initialize(EnemyController controller)
     {
-        if (controller == null || controller.Data == null)
+        if (isInitialized)
+            return true;
+
+        if (controller == null || enemyData == null)
         {
-            Debug.LogError($"{name}: EnemyController 또는 EnemyDataSO가 없습니다.", this);
-            enabled = false;
-            return;
+            Debug.LogError(
+                $"{name}: EnemyController 또는 EnemyDataSO가 없습니다.", this );
+
+            return false;
         }
 
         enemyController = controller;
-        MaxHealth = controller.Data.MaxHealth;
-        CurrentHealth = MaxHealth;
-        IsDead = false;
+
+        if (_animator == null)
+        {
+            _animator = GetComponent<Animator>();
+
+            if (_animator == null)
+                _animator = GetComponentInChildren<Animator>();
+        }
+
+        if (_animator == null)
+        {
+            Debug.LogError(
+                $"{name}: Animator가 없습니다.", this );
+
+            return false;
+        }
+
+        EnemyCopyData();
+
+        // 부모 클래스의 공통 체력 초기화
+        InitializeHealth(enemyData.MaxHealth);
+
+        isInitialized = true;
+
+        return true;
     }
 
-    // 받는 데미지
-    public void TakeDamage(float damage)
+    // SO 데이터 복사
+    private void EnemyCopyData()
     {
-        // 이미 죽었거나 잘못된 피해량이면 무시하기
-        if (IsDead || damage <= 0f) return;
+        attackDamage = enemyData.AttackDamage;
 
-        // 체력이 음수가 되지 않게 보정
-        CurrentHealth = Mathf.Max(0, CurrentHealth - damage);
-
-        Debug.Log(CurrentHealth);
-
-        if (CurrentHealth <= 0f)
-            Die();
+        enemyMoveSpeed = enemyData.MoveSpeed;
+        attackRange = enemyData.AttackRange;
+        attackCooldown = enemyData.AttackCooldown;
     }
 
-    private void Die()
+    // 사망 처리
+    protected override void Die()
     {
-        if(IsDead) return;
+        if (IsDead) return;
 
-        IsDead = true;
+        base.Die();
 
-        enemyController.EnterDeadState();
+        // 몬스터 FSM을 죽은 상태로 전환
+        enemyController?.EnterDeadState();
+    }
 
+    private void OnDrawGizmosSelected()
+    {
+        if (enemyData == null)
+            return;
+
+        DrawAttackRange(
+            transform.position,
+            enemyData.AttackRange
+        );
+    }
+
+    private void DrawAttackRange(Vector3 center, float radius)
+    {
+        Gizmos.color = attackRangeColor;
+
+        int segments = 48;
+
+        Vector3 previousPoint =
+            center + new Vector3(radius, 0f, 0f);
+
+        for (int i = 1; i <= segments; i++)
+        {
+            float angle = i * Mathf.PI * 2f / segments;
+
+            Vector3 nextPoint = center + new Vector3(
+                Mathf.Cos(angle) * radius,
+                0f,
+                Mathf.Sin(angle) * radius
+            );
+
+            Gizmos.DrawLine(previousPoint, nextPoint);
+
+            previousPoint = nextPoint;
+        }
     }
 }
