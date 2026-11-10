@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static PublicDefines;
+using static UnityEngine.UI.GridLayoutGroup;
 
 public class Player : SkeletalEntity {
     public enum PlayerStateBase {
@@ -34,6 +35,7 @@ public class Player : SkeletalEntity {
 
     private Vector2 _inputVec;
     private Vector3 _lookDir;
+    private float   _verticalVelocity;
     [SerializeField] private Vector3 _attackPointOffset = new Vector3(0.0f, 1.0f, 1.0f);
     [SerializeField] private Vector3 _attackRange = new Vector3(2.0f, 1.0f, 1.5f);
 
@@ -146,6 +148,29 @@ public class Player : SkeletalEntity {
         _currentWeapon.transform.localRotation = Quaternion.identity;
     }
 
+    private void UpdatePosition() {
+        _verticalVelocity += -9.8f * Time.deltaTime;
+
+        _velocity = _moveDirVec * moveSpeed;
+
+        if (IsOnGround()) {
+            _velocity.y = 0.0f;
+            _verticalVelocity = 0.0f;
+        }
+        else {
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, Vector3.down, out hit, 2.5f, LayerMask.GetMask("Ground"))) {
+                _velocity.y = -5.0f;     // Hard coded, refactoring if it has to
+            }
+            else {
+                _verticalVelocity += -9.8f * Time.deltaTime;
+                _velocity.y = _verticalVelocity;
+            }
+        }
+
+        _characterController.Move(_velocity * Time.deltaTime);
+    }
+
     private bool IsOnGround() {
         if (_characterController.isGrounded) return true;
 
@@ -231,6 +256,7 @@ public class Player : SkeletalEntity {
 
         public override void Start() {
             _owner._animator.CrossFade(AHIdle, 0.1f);
+            _owner._moveDirVec = Vector3.zero;
         }
 
         public override void Update() {
@@ -238,6 +264,9 @@ public class Player : SkeletalEntity {
                 _owner.SetStateBase(PlayerStateBase.Run);
                 return;
             }
+
+            // Ground Check
+            _owner.UpdatePosition();
 
             if (_owner._currentStateCombat != PlayerStateCombat.Idle) {
                 _owner.CheckCombatRotation();
@@ -266,18 +295,7 @@ public class Player : SkeletalEntity {
             _owner._velocity = _owner._moveDirVec * _owner.moveSpeed;
 
             // Ground Check
-            if (_owner.IsOnGround()) {
-                _owner._velocity.y = 0.0f;
-            }
-            else {
-                RaycastHit hit;
-                if (Physics.Raycast(_owner.transform.position, Vector3.down, out hit, 2.5f, LayerMask.GetMask("Ground"))) {
-                    _owner._velocity.y = -5.0f;     // Hard coded, refactoring if it has to
-                }
-            }
-
-            // Actual Move
-            _owner._characterController.Move(_owner._velocity * Time.deltaTime);
+            _owner.UpdatePosition();
 
             // None Combat -> just move forward
             if (_owner._currentStateCombat == PlayerStateCombat.Idle) {
