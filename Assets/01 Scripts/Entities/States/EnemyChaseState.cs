@@ -12,6 +12,7 @@ public class EnemyChaseState : EnemyState
     {
         repathTimer = 0f;
         EnemyController.Movement.Resume();
+        EnemyController.Enemy.Animator.CrossFade(EnemyAnimationsData.Run, 0.1f, 0);
     }
 
     public override void Update()

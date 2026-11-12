@@ -9,6 +9,7 @@ public class EnemyIdleState : EnemyState
     public override void Enter()
     {
         EnemyController.Movement.Stop();
+        EnemyController.Enemy.Animator.CrossFade(EnemyAnimationsData.Idle, 0.1f,0);
     }
 
     public override void Update()
