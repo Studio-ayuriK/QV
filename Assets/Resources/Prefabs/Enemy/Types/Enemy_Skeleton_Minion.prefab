@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8593412548506665763}
-  - component: {fileID: 3384505808968030081}
   - component: {fileID: 831387237729657536}
   - component: {fileID: 4633106474103630685}
   - component: {fileID: 4449408557358952855}
@@ -17,8 +16,9 @@ GameObject:
   - component: {fileID: 5138957958697669757}
   - component: {fileID: 8201122055299185855}
   - component: {fileID: 2260095586481513436}
+  - component: {fileID: 6414077608380318266}
   m_Layer: 7
-  m_Name: Skeleton_Minion
+  m_Name: Enemy_Skeleton_Minion
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -40,31 +40,6 @@ Transform:
   - {fileID: 6969544071472044456}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!143 &3384505808968030081
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2935085938519078919}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 2
-  m_Radius: 0.5
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!95 &831387237729657536
 Animator:
   serializedVersion: 7
@@ -136,7 +111,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   moveSpeed: 6
   rotationSpeed: 20
-  enemyData: {fileID: 0}
+  enemyData: {fileID: 11400000, guid: 38dfc8ed05e053c43a818cae342b9888, type: 2}
   attackRangeColor: {r: 0, g: 1, b: 1, a: 1}
 --- !u!114 &5138957958697669757
 MonoBehaviour:
@@ -184,6 +159,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9304f0b0d7537242886110887c81907, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
+--- !u!136 &6414077608380318266
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2935085938519078919}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &7211835980388636572
 PrefabInstance:
   m_ObjectHideFlags: 0
