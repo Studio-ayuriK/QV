@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class TransparentObstacle : MonoBehaviour {
+public class FadeObstacle : MonoBehaviour {
     [Header("Fade Settings")]
     public float fadedAlpha = 0.2f;
     public float fadeDuration = 0.25f;

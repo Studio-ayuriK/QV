@@ -11,7 +11,7 @@ public class TPVCamera : MonoBehaviour {
 
     private Vector3 _destPos;
     private Vector3 _armVector;
-    private TransparentObstacle _currentObstacle;
+    private FadeObstacle _currentObstacle;
 
     void Start() {
         _destPos = target.position - _armVector * distance;
@@ -25,13 +25,14 @@ public class TPVCamera : MonoBehaviour {
     }
 
     void LateUpdate() {
+        // 장애물 투명화 기능
         Vector3 dir = target.position - transform.position;
 
         if (Physics.Raycast(transform.position, dir.normalized,
             out RaycastHit hit, dir.magnitude, LayerMask.GetMask("Obstacles"))) {
-            TransparentObstacle fade = hit.collider.GetComponent<TransparentObstacle>();
+            FadeObstacle fade = hit.collider.GetComponent<FadeObstacle>();
             if (fade == null)
-                fade = hit.transform.GetComponentInParent<TransparentObstacle>();
+                fade = hit.transform.GetComponentInParent<FadeObstacle>();
 
             if (fade != null && fade != _currentObstacle) {
                 // New obstacle: fade old one in, new one out
