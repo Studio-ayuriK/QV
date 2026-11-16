@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -12,12 +13,12 @@ public class TPVCamera : MonoBehaviour {
     private Vector3 _destPos;
     private Vector3 _armVector;
 
-    void Start() {
+    private void Start() {
         _destPos = target.position - _armVector * distance;
         transform.position = _destPos;
     }
 
-    void Update() {
+    private void Update() {
         _destPos = target.position - _armVector * distance;
         if ((transform.position - _destPos).magnitude > 0.001f)
         transform.position = Vector3.Lerp(transform.position, _destPos, cameraMovementSmoothness);

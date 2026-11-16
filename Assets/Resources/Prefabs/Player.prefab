@@ -84,6 +84,10 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 9855dd39549dc514b85f1c39d7526418, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 9855dd39549dc514b85f1c39d7526418, type: 3}
       propertyPath: m_TagString
       value: Player
       objectReference: {fileID: 0}
@@ -115,6 +119,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9855dd39549dc514b85f1c39d7526418, type: 3}
       insertIndex: 3
       addedObject: {fileID: 7462288227512805680}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9855dd39549dc514b85f1c39d7526418, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4241662975790126084}
   m_SourcePrefab: {fileID: 100100000, guid: 9855dd39549dc514b85f1c39d7526418, type: 3}
 --- !u!4 &3575622470471251615 stripped
 Transform:
@@ -199,3 +206,19 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1.1, z: 0}
+--- !u!114 &4241662975790126084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4500457041044037586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 344483cfa16c8a54c8a8633bef7b388a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
+  attackDamage: 10
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 0
