@@ -20,6 +20,8 @@ public class EnemyDeadState : EnemyState
         Debug.Log($"{EnemyController.name}: DeadState 진입");
         // 추후 사망 애니메이션,
         // 충돌 비활성화 등의 처리를 추가.
+        EnemyController.Enemy.Animator.CrossFade(EnemyAnimationsData.Death, 0.1f, 0);
+
     }
 
     public override void Update()
