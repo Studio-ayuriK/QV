@@ -210,7 +210,7 @@ public class EnemyCombat : CombatBase
     // 근접 공격 Animation Event
     public void AnimationEvent_MeleeAttack()
     {
-        Debug.Log($"{name}: 근접 공격 Animation Event 실행");
+        //Debug.Log($"{name}: 근접 공격 Animation Event 실행");
 
 
         if (!isAttacking || 

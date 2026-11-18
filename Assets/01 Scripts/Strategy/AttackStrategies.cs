@@ -25,7 +25,7 @@ public static class AttackStrategies
 
             // 근접 공격 로직
             attacker.DealDamage(target, damage);
-            Debug.Log($"{attacker.name}이 {target.name}에게 근접 공격을 수행합니다. 피해량: {damage}");
+            //Debug.Log($"{attacker.name}이 {target.name}에게 근접 공격을 수행합니다. 피해량: {damage}");
         }
     }
 

@@ -77,9 +77,11 @@ public class PlayerCombat : CombatBase
 
         //Debug.Log("Player Attack");
 
+        Vector3 direction = player.LookDirection;
+
         Vector3 attackPoint =
             player.transform.position + 
-            (player.LookDirection + player.transform.rotation * player.AttackPointOffset);
+            direction + player.transform.rotation * player.AttackPointOffset;
 
         Vector3 halfExtents =
             player.AttackRange / 2f;
