@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static PublicDefines;
+using static UnityEngine.GraphicsBuffer;
+using static UnityEngine.UI.GridLayoutGroup;
 
 public class Player : SkeletalEntity {
     public enum PlayerStateBase {
@@ -22,6 +24,11 @@ public class Player : SkeletalEntity {
         Left
     }
 
+    //==================== Property
+    public Vector3 LookDirection => _lookDir;
+    public Vector3 AttackPointOffset => _attackPointOffset;
+    public Vector3 AttackRange => _attackRange;
+
 
     //==================== Private Field
     private static readonly float AllowInputTime1HAttackSliceHorizontal = 0.3f;
@@ -34,6 +41,7 @@ public class Player : SkeletalEntity {
 
     private Vector2 _inputVec;
     private Vector3 _lookDir;
+    private float   _verticalVelocity;
     [SerializeField] private Vector3 _attackPointOffset = new Vector3(0.0f, 1.0f, 1.0f);
     [SerializeField] private Vector3 _attackRange = new Vector3(2.0f, 1.0f, 1.5f);
 
@@ -49,6 +57,11 @@ public class Player : SkeletalEntity {
 
     private Inventory _inventory = new();
 
+    [SerializeField] private Vector3 _detectCubeHalfExtents = new Vector3(1.5f, 0.5f, 1.5f);
+    private LayerMask _obstacleLayer;
+    private List<FadeObstacle>[] _fadeObstacles = new List<FadeObstacle>[2];
+    private uint _fadeObstacleListIdx = 0;
+
     // For test
     private SOItem _test1;
     private SOItem _test2;
@@ -57,7 +70,13 @@ public class Player : SkeletalEntity {
 
 
     //==================== Unity Internal Method
-    void Start() {
+    private void Awake() {
+        _obstacleLayer = LayerMask.GetMask("Obstacles");
+        _fadeObstacles[0] = new();
+        _fadeObstacles[1] = new();
+    }
+
+    private void Start() {
         _characterController = GetComponent<CharacterController>();
         _animator = GetComponent<Animator>();
         _weaponslotRight = transform.Find(TPWeaponslotRight);
@@ -84,15 +103,43 @@ public class Player : SkeletalEntity {
         //_inventory.AddItem(_test2);
     }
 
-    void Update() {
+    private void Update() {
         _stateClassesBase[_currentStateBase].Update();
         _stateClassesCombat[_currentStateCombat].Update();
     }
 
-    void LateUpdate() {
+    private void LateUpdate() {
         if (_currentStateCombat != PlayerStateCombat.Idle) {
             _spineTransform.rotation *= _upperRotationDiff;
         }
+
+        // 장애물 투명화 기능
+        Vector3 posOffset = new Vector3(
+            -(_detectCubeHalfExtents.x + 0.1f),
+            _detectCubeHalfExtents.y + 0.1f,
+            -(_detectCubeHalfExtents.z + 0.1f));
+
+        Collider[] hits = Physics.OverlapBox(transform.position + posOffset, _detectCubeHalfExtents,
+            Quaternion.identity, _obstacleLayer);
+
+        foreach (Collider hit in hits) {
+            FadeObstacle obstacle = hit.GetComponent<FadeObstacle>();
+            if (obstacle == null)
+                obstacle = hit.transform.GetComponentInParent<FadeObstacle>();
+
+            if (obstacle != null) {
+                obstacle.FadeOut();
+                _fadeObstacles[1 - _fadeObstacleListIdx].Add(obstacle);
+                if (_fadeObstacles[_fadeObstacleListIdx].Contains(obstacle))
+                    _fadeObstacles[_fadeObstacleListIdx].Remove(obstacle);
+            }
+        }
+
+        foreach (FadeObstacle obstacle in _fadeObstacles[_fadeObstacleListIdx])
+            obstacle.FadeIn();
+
+        _fadeObstacles[_fadeObstacleListIdx].Clear();
+        _fadeObstacleListIdx = 1 - _fadeObstacleListIdx;
     }
 
 
@@ -144,6 +191,29 @@ public class Player : SkeletalEntity {
         _currentWeapon.transform.SetParent(_weaponslotRight);
         _currentWeapon.transform.localPosition = Vector3.zero;
         _currentWeapon.transform.localRotation = Quaternion.identity;
+    }
+
+    private void UpdatePosition() {
+        _verticalVelocity += -9.8f * Time.deltaTime;
+
+        _velocity = _moveDirVec * moveSpeed;
+
+        if (IsOnGround()) {
+            _velocity.y = 0.0f;
+            _verticalVelocity = 0.0f;
+        }
+        else {
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, Vector3.down, out hit, 2.5f, LayerMask.GetMask("Ground"))) {
+                _velocity.y = -5.0f;     // Hard coded, refactoring if it has to
+            }
+            else {
+                _verticalVelocity += -9.8f * Time.deltaTime;
+                _velocity.y = _verticalVelocity;
+            }
+        }
+
+        _characterController.Move(_velocity * Time.deltaTime);
     }
 
     private bool IsOnGround() {
@@ -231,6 +301,7 @@ public class Player : SkeletalEntity {
 
         public override void Start() {
             _owner._animator.CrossFade(AHIdle, 0.1f);
+            _owner._moveDirVec = Vector3.zero;
         }
 
         public override void Update() {
@@ -238,6 +309,9 @@ public class Player : SkeletalEntity {
                 _owner.SetStateBase(PlayerStateBase.Run);
                 return;
             }
+
+            // Ground Check
+            _owner.UpdatePosition();
 
             if (_owner._currentStateCombat != PlayerStateCombat.Idle) {
                 _owner.CheckCombatRotation();
@@ -266,18 +340,7 @@ public class Player : SkeletalEntity {
             _owner._velocity = _owner._moveDirVec * _owner.moveSpeed;
 
             // Ground Check
-            if (_owner.IsOnGround()) {
-                _owner._velocity.y = 0.0f;
-            }
-            else {
-                RaycastHit hit;
-                if (Physics.Raycast(_owner.transform.position, Vector3.down, out hit, 2.5f, LayerMask.GetMask("Ground"))) {
-                    _owner._velocity.y = -5.0f;     // Hard coded, refactoring if it has to
-                }
-            }
-
-            // Actual Move
-            _owner._characterController.Move(_owner._velocity * Time.deltaTime);
+            _owner.UpdatePosition();
 
             // None Combat -> just move forward
             if (_owner._currentStateCombat == PlayerStateCombat.Idle) {
@@ -343,8 +406,4 @@ public class Player : SkeletalEntity {
             }
         }
     }
-
-    public Vector3 LookDirection => _lookDir;
-    public Vector3 AttackPointOffset => _attackPointOffset;
-    public Vector3 AttackRange => _attackRange;
 }
