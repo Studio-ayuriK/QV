@@ -91,6 +91,22 @@ public class Enemy : SkeletalEntity
         enemyController?.EnterDeadState();
     }
 
+    public override void TakeDamage(int damage)
+    {
+        if(IsDead || damage <= 0) return;
+
+        int previousHealth = CurrentHealth;
+
+        // 공통 체력 감소 처리
+        base.TakeDamage(damage);
+
+        // 체력이 감소하지 않았거나 사망한 경우
+        if (CurrentHealth >= previousHealth || IsDead) return;
+
+        // 피격 상태 진입
+        enemyController?.EnterHitState();
+    }
+
     private void OnDrawGizmosSelected()
     {
         if (enemyData == null)

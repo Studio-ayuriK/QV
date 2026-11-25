@@ -9,7 +9,9 @@ public class EnemyCombat : CombatBase
     [SerializeField]
     private AttackType attackType = AttackType.Melee;
 
-    private const int UpperBodyLayer = 1;
+    //private const int UpperBodyLayer = 1;
+    private const string AttackLayerName = "Upper Layer";
+    private int attackLayerIndex = -1;
 
     [Header("Animation Settings")]
     [SerializeField]
@@ -69,6 +71,10 @@ public class EnemyCombat : CombatBase
         animator = enemy.Animator;
 
         if (detector == null || animator == null) return false;
+
+        //  공격용 Animator Layer 확인
+        attackLayerIndex = animator.GetLayerIndex(AttackLayerName);
+        animator.SetLayerWeight(attackLayerIndex, 0f);
 
         // 근접 공격 전략 초기화
         meleeStrategy = new MeleeAttackStrategy();
@@ -146,6 +152,18 @@ public class EnemyCombat : CombatBase
         isAttackAnimationPlaying = false;
 
         attackTimer = 0f;
+
+        // 공격 레이어 비활성화
+        if (animator != null && attackLayerIndex >= 0)
+        {
+            animator.SetLayerWeight(attackLayerIndex, 0f);
+        }
+    }
+
+    // 애니메이션 Upper Layer
+    public void CancelAttackForHit()
+    {
+        EndAttack();
     }
 
     #endregion
@@ -161,10 +179,7 @@ public class EnemyCombat : CombatBase
         if (!TryGetTarget(out SkeletalEntity target))
             return false;
 
-        //Debug.Log($"{name}: 공격 시작 - {target.name}");
-
         hasExecutedAttack = false;
-        isAttackAnimationPlaying = true;
 
         switch (attackType)
         {
@@ -177,31 +192,49 @@ public class EnemyCombat : CombatBase
                 break;
 
             default:
-                isAttackAnimationPlaying = false;
                 return false;
         }
 
-        return true;
+        return isAttackAnimationPlaying;
     }
 
     // 근접 공격 애니메이션
     private void PlayMeleeAttack()
     {
-        animator.CrossFade(
-            EnemyAnimationsData.MeleeAttack, crossFadeDuration, GetAttackAnimationLayer(), 0f);
+        PlayAttackAnimation(EnemyAnimationsData.MeleeAttack);
     }
 
     // 원거리 공격 애니메이션
     private void PlayRangedAttack()
     {
-        animator.CrossFade(
-            EnemyAnimationsData.RangedAttack, crossFadeDuration, GetAttackAnimationLayer(), 0f);
+        PlayAttackAnimation(EnemyAnimationsData.RangedAttack);
     }
 
-    // Animator 레이어 확인
-    private int GetAttackAnimationLayer()
+    // 공격 애니메이션 실행
+    private void PlayAttackAnimation(int stateHash)
     {
-        return animator.layerCount > UpperBodyLayer ? UpperBodyLayer : 0;
+        if (animator == null || attackLayerIndex < 0)
+            return;
+
+        if (!animator.HasState(attackLayerIndex, stateHash))
+        {
+            isAttackAnimationPlaying = false;
+            return;
+        }
+
+        // 공격 레이어 활성화
+        animator.SetLayerWeight(attackLayerIndex, 1f);
+
+        hasExecutedAttack = false;
+        isAttackAnimationPlaying = true;
+
+        // 공격 애니메이션 재생
+        animator.CrossFade(
+            stateHash,
+            crossFadeDuration,
+            attackLayerIndex,
+            0f
+        );
     }
     #endregion
 
@@ -211,8 +244,6 @@ public class EnemyCombat : CombatBase
     public void AnimationEvent_MeleeAttack()
     {
         //Debug.Log($"{name}: 근접 공격 Animation Event 실행");
-
-
         if (!isAttacking || 
             !isAttackAnimationPlaying ||
             attackType != AttackType.Melee ||
@@ -240,6 +271,12 @@ public class EnemyCombat : CombatBase
     public void AnimationEvent_AttackFinished()
     {
         isAttackAnimationPlaying = false;
+
+        if (animator != null && attackLayerIndex >= 0)
+        {
+            animator.SetLayerWeight(attackLayerIndex, 0f);
+        }
+
     }
 
     #endregion

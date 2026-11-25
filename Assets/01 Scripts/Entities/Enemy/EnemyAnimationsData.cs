@@ -7,6 +7,8 @@ public static class EnemyAnimationsData
     public static readonly int Walk = Animator.StringToHash("Base Layer.Walking");
     public static readonly int Run = Animator.StringToHash("Base Layer.Running");
     public static readonly int Death = Animator.StringToHash("Base Layer.Death");
+    public static readonly int Hit_A = Animator.StringToHash("Base Layer.Hit_A");
+    public static readonly int Hit_B = Animator.StringToHash("Base Layer.Hit_B");
 
     // 전투 동작
     public static readonly int MeleeAttack = Animator.StringToHash("Upper Layer.Melee_1H_Attack_Slice_Horizontal");

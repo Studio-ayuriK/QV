@@ -1817,11 +1817,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3750812022580125244, guid: a954d4a778b441b49993cb26c9053666, type: 3}
   m_PrefabInstance: {fileID: 1419441289}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1449244641 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4500457041044037586, guid: fda0d871ae9a3304c8c3754aaedeff9b, type: 3}
-  m_PrefabInstance: {fileID: 1703237681}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1499631252
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2320,6 +2315,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4241662975790126084, guid: fda0d871ae9a3304c8c3754aaedeff9b, type: 3}
+      propertyPath: attackDamage
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4241662975790126084, guid: fda0d871ae9a3304c8c3754aaedeff9b, type: 3}
+      propertyPath: targetLayers.m_Bits
+      value: 128
+      objectReference: {fileID: 0}
     - target: {fileID: 4396239068073784177, guid: fda0d871ae9a3304c8c3754aaedeff9b, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: -66.36737
@@ -2467,10 +2470,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4500457041044037586, guid: fda0d871ae9a3304c8c3754aaedeff9b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 7462288228008046850}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fda0d871ae9a3304c8c3754aaedeff9b, type: 3}
 --- !u!1001 &1868020439
 PrefabInstance:
@@ -3323,22 +3323,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6c62a8473a1264144af4652983b78cd8, type: 3}
---- !u!114 &7462288228008046850
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1449244641}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 344483cfa16c8a54c8a8633bef7b388a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
-  attackDamage: 50
-  targetLayers:
-    serializedVersion: 2
-    m_Bits: 128
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

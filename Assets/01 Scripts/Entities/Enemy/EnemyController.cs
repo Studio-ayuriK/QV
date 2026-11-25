@@ -14,10 +14,11 @@ public class EnemyController : MonoBehaviour
 
 
     #region Enemy State
-    public EnemyIdleState IdleState { get; private set; }        // 대기
-    public EnemyChaseState ChaseState { get; private set; }      // 추격
-    public EnemyAttackState AttackState { get; private set; }    // 공격
-    public EnemyDeadState DeadState { get; private set; }        // 죽음
+    public EnemyIdleState IdleState { get; private set; }           // 대기
+    public EnemyChaseState ChaseState { get; private set; }         // 추격
+    public EnemyAttackState AttackState { get; private set; }       // 공격
+    public EnemyHitState HitState { get; private set; }             // 피격
+    public EnemyDeadState DeadState { get; private set; }           // 죽음
     #endregion
 
     private void Awake()
@@ -55,6 +56,7 @@ public class EnemyController : MonoBehaviour
         IdleState = new EnemyIdleState(this, StateMachine);
         ChaseState = new EnemyChaseState(this, StateMachine);
         AttackState = new EnemyAttackState(this, StateMachine);
+        HitState = new EnemyHitState(this, StateMachine);
         DeadState = new EnemyDeadState(this, StateMachine);
 
     }
@@ -80,4 +82,21 @@ public class EnemyController : MonoBehaviour
 
         StateMachine.ChangeState(DeadState);
     }
+
+    public void EnterHitState()
+    {
+        if(Enemy == null || Enemy.IsDead) return;
+
+        if (StateMachine == null || HitState == null) return;
+
+        StateMachine.ChangeState(HitState);
+    }
+    public void AnimationEvent_HitFinished()
+    {
+        if (Enemy == null || Enemy.IsDead)
+            return;
+
+        HitState?.AnimationFinished();
+    }
+
 }
