@@ -22,25 +22,16 @@ public class EnemyChaseState : EnemyState
         // 플레이어를 놓친 경우
         if (target == null)
         {
-            EnemyStateMachine.ChangeState(
-                EnemyController.IdleState
-            );
-
+            EnemyStateMachine.ChangeState(EnemyController.IdleState);
             return;
         }
 
-        float distance = GetHorizontalDistance(
-            EnemyController.transform.position,
-            target.position
-        );
+        float distance = GetHorizontalDistance(EnemyController.transform.position, target.position);
 
         // 공격 사거리 진입
         if (distance <= EnemyController.Enemy.AttackRange)
         {
-            EnemyStateMachine.ChangeState(
-                EnemyController.AttackState
-            );
-
+            EnemyStateMachine.ChangeState(EnemyController.AttackState);
             return;
         }
 

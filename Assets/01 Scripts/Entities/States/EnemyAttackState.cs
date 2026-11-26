@@ -2,13 +2,25 @@ using UnityEngine;
 
 public class EnemyAttackState : EnemyState
 {
-    public EnemyAttackState(EnemyController enemyController, EnemyStateMachine enemyStateMachine) : base(enemyController, enemyStateMachine)
-    {
-    }
+    public const float AttackExitBuffer = 0.3f;
+    public EnemyAttackState(EnemyController enemyController, EnemyStateMachine enemyStateMachine) : base(enemyController, enemyStateMachine) { }
 
     public override void Enter()
     {
         EnemyController.Movement.Stop();
+
+        // Base Layer의 Hit 애니메이션 자세에서 벗어나기
+        Animator animator = EnemyController.Enemy.Animator;
+
+        if (animator != null)
+        {
+            animator.CrossFade(
+                EnemyAnimationsData.Idle,
+                0.1f,
+                0
+            );
+        }
+
         EnemyController.Combat.BeginAttack();
     }
 
@@ -23,12 +35,17 @@ public class EnemyAttackState : EnemyState
             return;
         }
 
+        if (EnemyController.Combat.IsAttackAnimationPlaying) return;
+
         float distance = GetHorizontalDistance(
             EnemyController.transform.position,
             target.position
         );
+
+        float exitRange = EnemyController.Enemy.AttackRange + AttackExitBuffer;
         // 공격 사거리 이탈
-        if (distance > EnemyController.Enemy.AttackRange)
+        //if (distance > EnemyController.Enemy.AttackRange)
+        if (distance > exitRange)
         {
             EnemyStateMachine.ChangeState(EnemyController.ChaseState);
             return;

@@ -9,7 +9,6 @@ public class EnemyCombat : CombatBase
     [SerializeField]
     private AttackType attackType = AttackType.Melee;
 
-    //private const int UpperBodyLayer = 1;
     private const string AttackLayerName = "Upper Layer";
     private int attackLayerIndex = -1;
 
@@ -52,6 +51,7 @@ public class EnemyCombat : CombatBase
 
     public AttackType CurrentAttackType => attackType;
     public bool IsAttacking => isAttacking;
+    public bool IsAttackAnimationPlaying => isAttackAnimationPlaying;
 
     private bool isInitialized;
 
@@ -74,6 +74,10 @@ public class EnemyCombat : CombatBase
 
         //  공격용 Animator Layer 확인
         attackLayerIndex = animator.GetLayerIndex(AttackLayerName);
+        if (attackLayerIndex < 0)
+        {
+            return false;
+        }
         animator.SetLayerWeight(attackLayerIndex, 0f);
 
         // 근접 공격 전략 초기화
@@ -84,7 +88,6 @@ public class EnemyCombat : CombatBase
         {
             if (projectilePrefab == null || projectileSpawnPoint == null)
             {
-                Debug.LogError($"{name}: 투사체 또는 생성 위치가 설정되지 않았습니다.", this);
                 return false;
             }
 
@@ -177,7 +180,9 @@ public class EnemyCombat : CombatBase
             return false;
 
         if (!TryGetTarget(out SkeletalEntity target))
+        {
             return false;
+        }
 
         hasExecutedAttack = false;
 
@@ -276,7 +281,6 @@ public class EnemyCombat : CombatBase
         {
             animator.SetLayerWeight(attackLayerIndex, 0f);
         }
-
     }
 
     #endregion
@@ -343,6 +347,7 @@ public class EnemyCombat : CombatBase
             transform.position,
             foundTarget.transform.position
         );
+
         if (distance > enemy.AttackRange) return false;
 
         targetEntity = foundTarget;

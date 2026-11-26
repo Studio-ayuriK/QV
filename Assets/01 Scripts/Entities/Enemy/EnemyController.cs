@@ -32,8 +32,6 @@ public class EnemyController : MonoBehaviour
         if (Enemy == null || Detector == null ||
             Combat == null || Movement == null)
         {
-            Debug.LogError($"{name}: 필요한 컴포넌트가 없습니다.", this);
-
             enabled = false;
             return;
         }
@@ -88,13 +86,15 @@ public class EnemyController : MonoBehaviour
         if(Enemy == null || Enemy.IsDead) return;
 
         if (StateMachine == null || HitState == null) return;
-
+        
         StateMachine.ChangeState(HitState);
     }
     public void AnimationEvent_HitFinished()
     {
         if (Enemy == null || Enemy.IsDead)
             return;
+
+        if (StateMachine == null || StateMachine.CurrentState != HitState) return;
 
         HitState?.AnimationFinished();
     }

@@ -7,7 +7,7 @@ public class EnemyState
 
     public virtual bool IsTerminal => false;    // 최종 상태 여부 확인
 
-    protected EnemyState(
+    public EnemyState(
         EnemyController enemyController, EnemyStateMachine enemyStateMachine)
     {
         EnemyController = enemyController;

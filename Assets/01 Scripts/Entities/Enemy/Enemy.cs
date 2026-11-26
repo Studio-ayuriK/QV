@@ -36,9 +36,6 @@ public class Enemy : SkeletalEntity
 
         if (controller == null || enemyData == null)
         {
-            Debug.LogError(
-                $"{name}: EnemyController 또는 EnemyDataSO가 없습니다.", this );
-
             return false;
         }
 
@@ -54,9 +51,6 @@ public class Enemy : SkeletalEntity
 
         if (_animator == null)
         {
-            Debug.LogError(
-                $"{name}: Animator가 없습니다.", this );
-
             return false;
         }
 

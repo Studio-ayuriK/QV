@@ -16,33 +16,38 @@ public class EnemyHitState : EnemyState
 
     public override void Update()
     {
-        if (!isAnimationFinished) return;
+        if (!isAnimationFinished)
+            return;
 
-        // 사망 상태 확인
         if (EnemyController.Enemy.IsDead)
         {
             EnemyStateMachine.ChangeState(EnemyController.DeadState);
             return;
         }
-        
-        // Player를 찾지 못한 경우
+
         Transform player = EnemyController.Detector.Target;
+
         if (player == null)
         {
-            // 걷기 상태
             EnemyStateMachine.ChangeState(EnemyController.IdleState);
             return;
         }
 
-        // 공격 사거리 안에 있는 겨웅
         float distance = GetHorizontalDistance(EnemyController.transform.position, player.position);
-        if (distance <= EnemyController.Enemy.AttackRange)
+
+        float attackRange = EnemyController.Enemy.AttackRange;
+
+        if (distance <= attackRange)
         {
-            EnemyStateMachine.ChangeState(EnemyController.AttackState);
+            EnemyStateMachine.ChangeState(
+                EnemyController.AttackState
+            );
         }
-        else // 공격 사거리 밖의 경우
+        else
         {
-            EnemyStateMachine.ChangeState(EnemyController.ChaseState);
+            EnemyStateMachine.ChangeState(
+                EnemyController.ChaseState
+            );
         }
     }
 
