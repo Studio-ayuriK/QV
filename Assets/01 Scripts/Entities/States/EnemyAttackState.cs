@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class EnemyAttackState : EnemyState
 {
-    public const float AttackExitBuffer = 0.3f;
     public EnemyAttackState(EnemyController enemyController, EnemyStateMachine enemyStateMachine) : base(enemyController, enemyStateMachine) { }
 
     public override void Enter()
@@ -14,11 +13,7 @@ public class EnemyAttackState : EnemyState
 
         if (animator != null)
         {
-            animator.CrossFade(
-                EnemyAnimationsData.Idle,
-                0.1f,
-                0
-            );
+            animator.CrossFade(EnemyAnimationsData.Idle, 0.1f, 0);
         }
 
         EnemyController.Combat.BeginAttack();
@@ -42,10 +37,10 @@ public class EnemyAttackState : EnemyState
             target.position
         );
 
-        float exitRange = EnemyController.Enemy.AttackRange + AttackExitBuffer;
+        //float exitRange = EnemyController.Enemy.AttackRange + AttackExitBuffer;
         // 공격 사거리 이탈
-        //if (distance > EnemyController.Enemy.AttackRange)
-        if (distance > exitRange)
+        if (distance > EnemyController.Enemy.AttackRange)
+            //if (distance > exitRange)
         {
             EnemyStateMachine.ChangeState(EnemyController.ChaseState);
             return;

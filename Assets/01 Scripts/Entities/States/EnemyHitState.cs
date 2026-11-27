@@ -50,7 +50,20 @@ public class EnemyHitState : EnemyState
             );
         }
     }
+    public void RestartHitAnimation()
+    {
+        if (EnemyController.Enemy.IsDead) return;
 
+        // 이전 애니메이션 종료 상태 초기화
+        isAnimationFinished = false;
+        Animator animator = EnemyController.Enemy.Animator;
+
+        if(animator != null)
+        {
+            animator.Play(EnemyAnimationsData.Hit_A, 0, 0f);
+        }
+        Debug.Log("hit 애니메이션 재 실행");
+    }
     public void AnimationFinished()
     {
         isAnimationFinished = true;

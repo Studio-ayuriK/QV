@@ -81,12 +81,21 @@ public class EnemyController : MonoBehaviour
         StateMachine.ChangeState(DeadState);
     }
 
+    // 피격 상태 호출
     public void EnterHitState()
     {
         if(Enemy == null || Enemy.IsDead) return;
 
         if (StateMachine == null || HitState == null) return;
         
+        // 이미 hitState라면
+        if (StateMachine.CurrentState == HitState)
+        {
+            HitState.RestartHitAnimation();
+            return;
+        }
+
+        // 다른 상태라면
         StateMachine.ChangeState(HitState);
     }
     public void AnimationEvent_HitFinished()
